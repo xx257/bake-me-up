@@ -25,3 +25,6 @@ yarn-error.log*
 # Data artifacts
 *.sqlite
 *.db
+
+# Project plan files (kept local, not tracked)
+*Project_Plan*.md

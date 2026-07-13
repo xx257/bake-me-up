@@ -30,12 +30,11 @@ Full write-up: [`docs/02-solution.md`](docs/02-solution.md).
 - [`docs/02-solution.md`](docs/02-solution.md) — Task 2: solution, infra & agent diagrams
 - [`docs/03-data.md`](docs/03-data.md) — Task 3: data sources + chunking strategy
 - [`docs/evaluation.md`](docs/evaluation.md) — evaluation strategy
-- [`Bake_Me_Up_v0.1_Project_Plan.md`](Bake_Me_Up_v0.1_Project_Plan.md) — 5-day plan
 
 ## Status
 
-- [x] Day 1 — Product definition & architecture
-- [ ] Day 2 — Backend (LangGraph agent, RAG, Tavily, memory, deploy)
-- [ ] Day 3 — Frontend & end-to-end MVP
-- [ ] Day 4 — Evaluation & retrieval improvements
-- [ ] Day 5 — Polish, Loom demo, submit
+- [x] **Day 1** (Sun 7/12) — Product definition & architecture
+- [ ] **Day 2** (Mon 7/13) — Vertical slice: deployed RAG + memory + chat, end-to-end
+- [ ] **Day 3** (Tue 7/14) — Complete MVP: scaling + timeline tools, baseline eval; feature freeze
+- [ ] **Day 4** (Wed 7/15) — Retrieval improvements + polish + docs + Loom
+- [ ] **Day 5** (Thu 7/16) — Release & submit *(deadline 7pm ET)*
