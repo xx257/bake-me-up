@@ -16,7 +16,7 @@ knowledge needed to execute each step correctly. See [`docs/01-problem.md`](docs
 ## Architecture
 
 - **Frontend:** Next.js on Vercel (runs on phone + laptop in a browser)
-- **Agent:** Python LangGraph on Render, with a Postgres checkpointer for memory
+- **Agent:** Python LangGraph on **LangGraph Platform** (managed via LangSmith), with a managed Postgres checkpointer for memory
 - **LLM:** OpenAI (gpt-4o / gpt-4o-mini) behind the **Vercel AI Gateway**
 - **Retrieval:** Qdrant Cloud vector store, OpenAI embeddings; hybrid + rerank
 - **Tools:** Tavily web search, deterministic `scale()` and `timeline()`

@@ -34,7 +34,7 @@ flowchart LR
     subgraph Client [Browser - phone + laptop]
         UI[Next.js chat UI<br/>on Vercel]
     end
-    subgraph Backend [Render]
+    subgraph Backend [LangGraph Platform · LangSmith]
         AG[LangGraph agent<br/>+ memory checkpointer]
         RAG[Retriever<br/>hybrid + rerank]
         TOOLS[Tools: Tavily / scale / timeline]
@@ -43,7 +43,7 @@ flowchart LR
     LLM[OpenAI<br/>gpt-4o / 4o-mini]
     VDB[(Qdrant Cloud<br/>vector store)]
     EMB[OpenAI embeddings<br/>text-embedding-3-small]
-    MEM[(Postgres<br/>checkpointer)]
+    MEM[(Managed Postgres<br/>checkpointer)]
     MON[LangSmith]
 
     UI -->|HTTP| AG
@@ -66,12 +66,12 @@ flowchart LR
 | **LLM gateway**    | **Vercel AI Gateway**           | Required by Task 2; low-risk integration — just the OpenAI client's `base_url` in the Python backend |
 | Embedding model    | OpenAI text-embedding-3-small   | Cheap, high-quality, pairs natively with the LLM                            |
 | Vector database    | Qdrant Cloud                    | Managed free tier; supports hybrid/dense retrieval and metadata filters     |
-| Memory             | LangGraph checkpointer (Postgres) | Thread-scoped conversation memory (required memory component)             |
+| Memory             | LangGraph checkpointer (managed Postgres) | Thread-scoped conversation memory (required); Postgres persistence is provided by LangGraph Platform |
 | External tool      | Tavily Search                   | Agentic web search for substitutions/techniques beyond the corpus           |
 | Deterministic tools| `scale()`, `timeline()`         | Precise math the LLM shouldn't hallucinate; clean deterministic eval targets|
-| Monitoring         | LangSmith                       | Native LangGraph tracing of agent steps, tool calls, and retrieval          |
+| Monitoring         | LangSmith                       | Native LangGraph tracing of agent steps, tool calls, and retrieval; same platform as the deploy |
 | Evaluation         | RAGAS + custom + LLM-judge      | RAG metrics + deterministic unit checks + judged guidance quality           |
-| Deployment         | Vercel (FE) + Render (BE)       | Public endpoints; splits static UI from the long-running Python agent        |
+| Deployment         | Vercel (FE) + **LangGraph Platform** (BE) | Public endpoints; managed LangGraph deploy (paid LangSmith) removes hand-rolled backend hosting and includes persistence |
 
 ## 2.3 Agent workflow
 
