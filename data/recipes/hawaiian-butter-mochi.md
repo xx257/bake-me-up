@@ -6,6 +6,13 @@
 id: hawaiian_butter_mochi
 title: Hawaiian Butter Mochi
 est_time_min: 70
+# Recommendation profile (Planning Mode: embedded in Qdrant for retrieval).
+profile:
+  active_time_min: 15
+  taste: [sweet, coconut]
+  texture: [chewy, custardy, dense]
+  occasion: [potluck, snack, dessert]
+  pairs_with: [coffee, tea, fruit]
 aliases:
   - butter mochi
   - Hawaiian butter mochi

@@ -28,6 +28,21 @@ def retrieve(query: str, recipe_id: str | None = None, k: int = 4) -> list[Docum
     return store.similarity_search(query, k=k, filter=qdrant_filter)
 
 
+def retrieve_profiles(query: str, k: int = 4) -> list[dict]:
+    """Planning Mode: semantic search over recipe profiles. Returns payloads (catalog
+    entries minus body) for the ranker + UI cards."""
+    import os
+
+    from .config import get_embeddings, get_qdrant_client
+
+    collection = os.environ.get("QDRANT_PROFILES_COLLECTION", "bake_me_up_profiles")
+    vector = get_embeddings().embed_query(query)
+    hits = get_qdrant_client().query_points(
+        collection_name=collection, query=vector, limit=k
+    ).points
+    return [h.payload for h in hits]
+
+
 def format_context(docs: list[Document]) -> str:
     """Render retrieved chunks into a grounding block with recipe attribution."""
     blocks = []

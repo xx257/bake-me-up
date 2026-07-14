@@ -13,13 +13,13 @@ The experience begins with the user's goal, not the recipe grid.
 
 **Core path (shipping):**
 1. **Kitchen** — describe a goal (time, ingredients, occasion, skill level).
-2. **AI planning** — the agent reasons over the recipe **catalog** and returns
-   recommendations, each with a short "why".
+2. **AI planning** — extract intent → retrieve matching recipe **profiles** → rank &
+   explain the best picks, each with a short "why".
 3. **Choose a recipe** → recipe detail.
 4. **Start Baking** → **Guided Baking** mode (one step at a time, progress, prev/next).
-5. **AI coach** — recipe-grounded RAG, aware of the current step, that **remembers the
-   planning goal** across the session (thread memory); **general-knowledge fallback**
-   when the question isn't about a library recipe.
+5. **AI coach** — loads the **full recipe into context**, aware of the current step, and
+   **remembers the planning goal** across the session (thread memory);
+   **general-knowledge fallback** when nothing in the library matches.
 
 **Supporting / next:** Tavily web search, `scale()`, `timeline()`, and a deterministic
 workflow engine (walk the per-step `next_step` chain) — none block the MVP.
@@ -38,25 +38,25 @@ flowchart LR
     end
     subgraph Backend [LangGraph Platform · LangSmith]
         RT[Router]
-        PL[Plan / recommend]
-        QA[Recipe QA · RAG]
+        PL[Plan: intent → retrieve<br/>profiles → rank]
+        BK[Bake coach:<br/>full recipe in context]
         GEN[General knowledge]
-        CAT[(Recipe catalog<br/>catalog.json)]
+        CAT[(Recipe catalog + bodies<br/>catalog.json)]
     end
     GW[Vercel AI Gateway]
     LLM[OpenAI<br/>gpt-4o / 4o-mini]
-    VDB[(Qdrant Cloud<br/>vector store)]
+    VDB[(Qdrant Cloud<br/>recipe profiles)]
     EMB[OpenAI embeddings<br/>text-embedding-3-small]
     MEM[(Managed Postgres<br/>checkpointer · threads)]
     MON[LangSmith]
 
     UI -->|HTTP · thread| RT
     RT --> PL
-    RT --> QA
+    RT --> BK
     RT --> GEN
-    PL --> CAT
-    QA --> VDB
-    QA --> EMB
+    PL --> VDB
+    PL --> EMB
+    BK --> CAT
     RT -->|via| GW --> LLM
     RT --> MEM
     RT -.trace.-> MON
@@ -68,12 +68,12 @@ flowchart LR
 |--------------------|---------------------------------|----------------------------------------------------------------------------|
 | User interface     | Next.js on Vercel               | Recipe-first app (Kitchen → Recipes → Guided Baking) on phone + laptop      |
 | Agent framework    | LangGraph (Python)              | Explicit graph gives controllable routing across lanes + built-in memory    |
-| Router             | LLM classifier (gpt-4o-mini)    | Sends each turn to plan / recipe_qa / general based on intent + active recipe|
-| Recipe catalog     | Committed `catalog.json`        | Lets the planner reason over the whole library without hitting the corpus at runtime |
-| LLM                | OpenAI gpt-4o / gpt-4o-mini     | Strong instruction-following; mini keeps routing cheap                       |
+| Router             | LLM classifier (gpt-4o-mini)    | Recipe active → bake; else plan or general                                  |
+| Recipe catalog     | Committed `catalog.json`        | Ships profile fields (for planning) + full recipe bodies (for the coach) with the deploy |
+| LLM                | OpenAI gpt-4o / gpt-4o-mini     | 4o coaches/ranks; mini does routing + intent extraction                     |
 | **LLM gateway**    | **Vercel AI Gateway**           | Required by Task 2; the chat LLM's `base_url` in the Python backend          |
 | Embedding model    | OpenAI text-embedding-3-small   | Cheap, high-quality; embeddings go direct to OpenAI                          |
-| Vector database    | Qdrant Cloud                    | Managed; dense retrieval + payload filter to the active recipe              |
+| Vector database    | Qdrant Cloud                    | **Recommendation profiles** for planning-mode retrieval (recipe-chunk RAG retained for eval/future) |
 | Memory             | LangGraph checkpointer (managed Postgres) | Thread-scoped memory (required); the planning goal carries into baking |
 | External tool      | Tavily Search *(next)*          | Web search for substitutions/techniques beyond the corpus                   |
 | Deterministic tools| `scale()`, `timeline()` *(next)*| Precise math the LLM shouldn't hallucinate; clean deterministic eval targets|
@@ -85,41 +85,48 @@ flowchart LR
 
 ```mermaid
 flowchart TD
-    U[User turn<br/>+ thread state · active_recipe] --> R{Router<br/>classify intent}
-    R -->|goal / recommend| PLAN[Plan: reason over the<br/>recipe catalog]
-    R -->|about this recipe| RET[Retrieve from Qdrant<br/>dense · filtered to recipe]
-    R -->|not in library| GEN[General baking knowledge<br/>+ 'not in your library']
-    RET --> SYN[Grounded answer + cite recipe]
-    PLAN --> CARDS[Reply + recommendation cards]
-    SYN --> SAVE[Persist turn to thread]
+    U[User turn<br/>+ thread state · active_recipe] --> R{Router}
+    R -->|recipe active → bake| BK[Coach: full recipe<br/>in context]
+    R -->|no recipe · goal → plan| P1[Extract intent<br/>structured prefs]
+    R -->|no recipe · off-topic → general| GEN[General knowledge<br/>+ 'not in your library']
+    P1 --> P2[Retrieve recipe<br/>profiles · Qdrant]
+    P2 --> P3[Rank + explain<br/>top candidates]
+    P3 --> CARDS[Reply + recommendation cards]
+    BK --> SAVE[Persist turn to thread]
     CARDS --> SAVE
     GEN --> SAVE
     SAVE --> U
 ```
 
-**Intent → lane.** A turn arrives on a **per-session thread** (created in the Kitchen,
-carried into the recipe page), so the backend already holds the conversation — including
-the user's planning goal. The **router** (gpt-4o-mini) classifies the turn, constrained
-by whether a recipe is active: with no active recipe (the Kitchen) it chooses **plan** or
-**general**; on a recipe page it chooses **recipe_qa** or **general**.
+**Two phases, two architectures.** A turn arrives on a **per-session thread** (created in
+the Kitchen, carried into the recipe page), so the backend already holds the conversation
+— including the user's planning goal. The **router** (gpt-4o-mini) is context-gated: if a
+recipe is active it goes straight to **bake**; with no recipe it picks **plan** or
+**general**.
 
-- **plan** reasons over the committed recipe **catalog** (title, category, difficulty,
-  est. time, key ingredients, description) and returns 1–3 recommendations with a reason
-  each; the structured cards ride back in the run output for the UI to render.
-- **recipe_qa** runs **dense retrieval** over Qdrant filtered to the active recipe, then
-  answers grounded and cited (declines when the answer isn't in the recipe).
-- **general** answers from general baking knowledge and notes the recipe isn't in the
-  user's library (they can add it later).
+- **Planning Mode (plan)** runs a three-step pipeline — retrieval only where it adds
+  value: (1) an LLM extracts the goal into **structured preferences** (taste, texture,
+  occasion, difficulty, time, ingredients); (2) those drive **retrieval over recipe
+  profiles** embedded in Qdrant; (3) an LLM **ranks and explains** *only* the top
+  candidates, returning recommendation cards in the run output.
+- **Baking Mode (bake)** loads the **full normalized recipe markdown** into the coach's
+  context and reasons over the whole workflow — no per-question retrieval (one recipe fits
+  the window, and coaching benefits from seeing every step). It stays grounded in that
+  recipe, weaving in general knowledge only for genuine gaps; Guided Baking passes the
+  current + next step so "what's next?" resolves exactly.
+- **General** answers from general baking knowledge and notes the recipe isn't in the
+  user's library yet.
 
 **Memory.** Every turn is written back to the thread via the LangGraph Platform
 checkpointer, so the goal set during planning ("I only have an hour") is available when
-the coach later helps during baking. Guided Baking (current step + next step) is surfaced
-to the coach so "what's next?" resolves without the user restating context. Every LLM
-call routes through the **Vercel AI Gateway**; LangSmith traces the whole path.
+the coach helps during baking. Every LLM call routes through the **Vercel AI Gateway**;
+LangSmith traces the whole path.
 
-**Planned lanes.** Tavily (web fallback), `scale()`/`timeline()` (deterministic tools),
-and a no-RAG workflow engine that walks each recipe's `#### Workflow` `next_step` chain
-are additive lanes off the same router.
+**Why split them.** Planning is a *retrieval* problem ("which recipe fits the goal?");
+baking is a *reasoning/coaching* problem ("help me finish this one"). Using a different
+architecture for each keeps the system simpler, more explainable, and independently
+evaluable. Additive future lanes (Tavily, `scale()`/`timeline()`, a no-RAG workflow
+engine) hang off the same router.
 
 ### Requirements coverage (req.md Task 2)
 

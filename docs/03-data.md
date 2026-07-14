@@ -28,6 +28,25 @@ evaluation meaningful. Candidate set (overlapping terminology on purpose):
 Shared terms (tangzhong, milk bread, matcha, enriched dough) across documents create a
 realistic retrieval test where the retriever must pick the *right* similar recipe.
 
+## Data for the two modes (v2)
+
+Two derived artifacts, both generated from the recipe files by
+`backend/agent/build_catalog.py` into a committed `catalog.json` (so they ship with the
+deploy — the backend never reads `data/recipes` at runtime):
+
+- **Recommendation profiles (Planning Mode).** A lightweight semantic profile per recipe
+  — title, summary, difficulty, total/active time, taste, texture, occasion, pairs-with,
+  key ingredients, skills, tags — embedded into a Qdrant **profiles** collection
+  (`python -m agent.ingest profiles`). Planning retrieves over these to match a goal to
+  recipes, then an LLM ranks + explains the top candidates.
+- **Full recipe bodies (Baking Mode).** The complete normalized markdown (prose; workflow
+  blocks stripped) is loaded straight into the coach's context — no per-question
+  retrieval. One recipe fits the window, and coaching benefits from seeing every step.
+
+The structure-aware **recipe-chunk** embeddings described below are **retained for
+evaluation and future recipe-level retrieval**, but are not on the live coaching path in
+v2.
+
 ## How they interact during usage
 
 The agent first attempts to answer from the **local recipe corpus** via RAG. When the

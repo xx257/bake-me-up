@@ -179,11 +179,55 @@ def _parse_report(recipe_dir: Path = RECIPE_DIR) -> None:
     print(f"\nTotal: {total} chunks across the corpus. No workflow/frontmatter leakage. ✅")
 
 
+def embed_profiles() -> int:
+    """Embed recommendation profiles into the Qdrant profiles collection (Planning Mode).
+
+    Payload = the full catalog entry minus the heavy body, so a profile hit already
+    carries everything the ranker and the UI card need.
+    """
+    import os
+
+    from dotenv import load_dotenv
+    from langchain_openai import OpenAIEmbeddings
+    from qdrant_client.models import Distance, PointStruct, VectorParams
+
+    from .catalog import get_catalog, profile_text
+    from .config import get_qdrant_client
+
+    load_dotenv()
+    collection = os.environ.get("QDRANT_PROFILES_COLLECTION", "bake_me_up_profiles")
+    client = get_qdrant_client()
+    if client.collection_exists(collection):
+        client.delete_collection(collection)
+    client.create_collection(
+        collection, vectors_config=VectorParams(size=EMBED_DIM, distance=Distance.COSINE)
+    )
+
+    embeddings = OpenAIEmbeddings(
+        model=os.environ.get("EMBEDDING_MODEL", "text-embedding-3-small")
+    )
+    entries = get_catalog()
+    vectors = embeddings.embed_documents([profile_text(e) for e in entries])
+    points = [
+        PointStruct(
+            id=i,
+            vector=vectors[i],
+            payload={k: v for k, v in e.items() if k != "body"},
+        )
+        for i, e in enumerate(entries)
+    ]
+    client.upsert(collection_name=collection, points=points)
+    print(f"Embedded {len(points)} recipe profiles -> Qdrant collection '{collection}'.")
+    return len(points)
+
+
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else "parse"
     if cmd == "parse":
         _parse_report()
     elif cmd == "embed":
         embed_and_upload()
+    elif cmd == "profiles":
+        embed_profiles()
     else:
-        sys.exit(f"unknown command: {cmd!r} (use 'parse' or 'embed')")
+        sys.exit(f"unknown command: {cmd!r} (use 'parse', 'embed', or 'profiles')")

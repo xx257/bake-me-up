@@ -5,6 +5,13 @@
 id: shokupan_yudane
 title: Japanese Milk Bread (Shokupan)
 est_time_min: 210
+# Recommendation profile (Planning Mode: embedded in Qdrant for retrieval).
+profile:
+  active_time_min: 60
+  taste: [mildly sweet, milky]
+  texture: [soft, fluffy, pillowy]
+  occasion: [breakfast, everyday, sandwiches]
+  pairs_with: [butter, jam, coffee, tea]
 aliases:
   - shokupan
   - Japanese milk bread

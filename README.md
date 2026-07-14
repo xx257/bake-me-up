@@ -18,9 +18,9 @@ knowledge needed to execute each step correctly. See [`docs/01-problem.md`](docs
 ## Architecture
 
 - **Frontend:** Next.js on Vercel — Kitchen (AI planning) → Recipes → Recipe Detail → Guided Baking
-- **Agent:** Python LangGraph on **LangGraph Platform** (via LangSmith). Router → **plan** (recommend from the recipe catalog) / **recipe_qa** (grounded RAG) / **general** (fallback). Per-session **thread** memory (managed Postgres) carries the goal from planning into baking.
+- **Agent:** Python LangGraph on **LangGraph Platform** (via LangSmith). Router → **plan** (extract intent → retrieve recipe profiles from Qdrant → rank & explain) / **bake** (full recipe loaded into the coach's context) / **general** (fallback). Per-session **thread** memory (managed Postgres) carries the goal from planning into baking.
 - **LLM:** OpenAI (gpt-4o / gpt-4o-mini) behind the **Vercel AI Gateway**
-- **Retrieval:** Qdrant Cloud vector store + OpenAI embeddings (dense, filtered to the active recipe)
+- **Retrieval:** Qdrant Cloud + OpenAI embeddings — recommendation **profiles** for planning; the coach loads the full recipe (no per-question RAG in v2)
 - **Next:** Tavily web search, deterministic `scale()` / `timeline()`, no-RAG workflow engine
 - **Monitoring:** LangSmith · **Eval:** RAGAS + recommendation + LLM-judge
 

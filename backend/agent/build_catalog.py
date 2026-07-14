@@ -1,7 +1,8 @@
-"""Generate agent/catalog.json from the recipe corpus.
+"""Generate agent/catalog.json from the recipe corpus (v2).
 
-The deployed backend can't see data/recipes, so the planner reads this committed catalog
-of recipe metadata. Regenerate + commit after editing recipes:
+Each entry carries (a) a recommendation profile for Planning Mode (embedded in Qdrant)
+and (b) the full normalized recipe markdown for Baking Mode (loaded into the coach's
+context). The deployed backend can't see data/recipes, so this is committed. Regenerate:
 
     uv run --project backend python -m agent.build_catalog
 """
@@ -9,6 +10,7 @@ of recipe metadata. Regenerate + commit after editing recipes:
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 import yaml
@@ -23,6 +25,8 @@ CATEGORIES = [
     ("cookies", "Cookies", "🍪"),
     ("mochi", "Mochi", "🍡"),
 ]
+
+_WORKFLOW_RE = re.compile(r"####\s*Workflow\s*```yaml.*?```", re.DOTALL | re.IGNORECASE)
 
 
 def category_of(tags: list[str]) -> dict:
@@ -40,6 +44,13 @@ def split_frontmatter(text: str) -> tuple[dict, str]:
     return {}, text
 
 
+def normalized_body(body: str) -> str:
+    """Prose the coach reads — drop the machine-only #### Workflow blocks + rules."""
+    body = _WORKFLOW_RE.sub("", body)
+    body = re.sub(r"\n-{3,}\s*(?=\n)", "", body)
+    return body.strip()
+
+
 def ingredient_names(meta: dict) -> list[str]:
     names: list[str] = []
     components = (meta.get("scale") or {}).get("components") or {}
@@ -52,16 +63,10 @@ def ingredient_names(meta: dict) -> list[str]:
                 if ing.get("name"):
                     names.append(ing["name"])
     seen: set[str] = set()
-    out: list[str] = []
-    for n in names:
-        if n not in seen:
-            seen.add(n)
-            out.append(n)
-    return out
+    return [n for n in names if not (n in seen or seen.add(n))]
 
 
 def description(body: str) -> str:
-    """First prose paragraph after the H1 title."""
     para: list[str] = []
     started = False
     for line in body.splitlines():
@@ -85,6 +90,7 @@ def main() -> None:
             continue
         meta, body = split_frontmatter(path.read_text())
         tags = meta.get("tags") or []
+        profile = meta.get("profile") or {}
         catalog.append(
             {
                 "id": meta.get("id") or path.stem,
@@ -92,10 +98,17 @@ def main() -> None:
                 "title": meta.get("title") or path.stem,
                 "category": category_of(tags),
                 "difficulty": (meta.get("difficulty") or {}).get("level"),
-                "est_time_min": meta.get("est_time_min"),
+                "skills": (meta.get("difficulty") or {}).get("skills", []),
+                "total_time_min": meta.get("est_time_min"),
+                "active_time_min": profile.get("active_time_min"),
+                "taste": profile.get("taste", []),
+                "texture": profile.get("texture", []),
+                "occasion": profile.get("occasion", []),
+                "pairs_with": profile.get("pairs_with", []),
                 "tags": tags,
                 "ingredients": ingredient_names(meta),
-                "description": description(body),
+                "summary": description(body),
+                "body": normalized_body(body),
             }
         )
     OUT.write_text(json.dumps(catalog, ensure_ascii=False, indent=2))

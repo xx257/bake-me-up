@@ -33,14 +33,20 @@ def get_chat_llm(mini: bool = False):
 
 
 @lru_cache(maxsize=1)
-def get_vectorstore():
-    """Qdrant Cloud vector store over the recipe collection."""
-    from langchain_qdrant import QdrantVectorStore
+def get_qdrant_client():
     from qdrant_client import QdrantClient
 
-    client = QdrantClient(url=os.environ["QDRANT_URL"], api_key=os.environ["QDRANT_API_KEY"])
+    return QdrantClient(url=os.environ["QDRANT_URL"], api_key=os.environ["QDRANT_API_KEY"])
+
+
+@lru_cache(maxsize=1)
+def get_vectorstore():
+    """Qdrant Cloud vector store over the recipe-chunk collection (RAG; not used by the
+    v2 coach, kept for eval / future recipe-level retrieval)."""
+    from langchain_qdrant import QdrantVectorStore
+
     return QdrantVectorStore(
-        client=client,
+        client=get_qdrant_client(),
         collection_name=os.environ.get("QDRANT_COLLECTION", "bake_me_up_recipes"),
         embedding=get_embeddings(),
     )

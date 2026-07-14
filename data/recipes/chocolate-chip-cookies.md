@@ -6,6 +6,13 @@
 id: chocolate_chip_cookies
 title: Chocolate Chip Cookies
 est_time_min: 40
+# Recommendation profile (Planning Mode: embedded in Qdrant for retrieval).
+profile:
+  active_time_min: 20
+  taste: [sweet, chocolate, buttery]
+  texture: [chewy, crisp edges]
+  occasion: [snack, dessert, quick, entertaining]
+  pairs_with: [milk, coffee]
 aliases:
   - chocolate chip cookies
   - choc chip cookies

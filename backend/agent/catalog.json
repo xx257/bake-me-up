@@ -8,7 +8,32 @@
       "emoji": "🍞"
     },
     "difficulty": "intermediate",
-    "est_time_min": 120,
+    "skills": [
+      "enriched dough",
+      "dough temperature",
+      "proofing",
+      "filled bun shaping"
+    ],
+    "total_time_min": 120,
+    "active_time_min": 70,
+    "taste": [
+      "sweet",
+      "red bean"
+    ],
+    "texture": [
+      "soft",
+      "fluffy"
+    ],
+    "occasion": [
+      "snack",
+      "afternoon tea",
+      "breakfast"
+    ],
+    "pairs_with": [
+      "green tea",
+      "coffee",
+      "milk"
+    ],
     "tags": [
       "bread",
       "sweet bread",
@@ -27,7 +52,8 @@
       "water",
       "butter"
     ],
-    "description": "Anpan made from the course's Kashipan sweet bread dough, filled with red bean paste. The complete base dough is included here so this recipe can be used independently."
+    "summary": "Anpan made from the course's Kashipan sweet bread dough, filled with red bean paste. The complete base dough is included here so this recipe can be used independently.",
+    "body": "# Anpan with Kashipan Sweet Bread Dough\n\nAnpan made from the course's Kashipan sweet bread dough, filled with red bean paste. The complete base dough is included here so this recipe can be used independently.\n\n## Ingredients\n\n### Kashipan Dough — 1 Batch\n\n- 552 g low protein bread flour\n- 61 g cake flour\n- 12 g instant dry yeast\n- 74 g sugar\n- 9 g salt\n- 18 g dry milk solids\n- 92 g eggs\n- 307 g water\n- 74 g butter\n\n**Total dough:** approximately 1,200 g\n\n### Anpan Assembly — Per Bun\n\n- 50 g Kashipan dough\n- 50 g red bean paste\n- Egg wash, as needed\n\n**Instructor note:** The red bean paste is made from sugar, water, and red beans.\n\n## Steps\n\n### Step 1 — Mix the Initial Kashipan Dough\n\n#### Recipe\n\nHold back the butter.\n\nMix the remaining ingredients in a mixing bowl with a hook attachment.\n\nMix on low speed for **4 minutes**, then on medium speed for **6 minutes**. The dough should have a smooth and elastic consistency.\n\n\n\n### Step 2 — Add the Butter\n\n#### Recipe\n\nAdd the butter and mix on medium speed for **6–8 minutes**.\n\nCheck the dough temperature. If the temperature is less than **28°C (82°F)**, mix on high speed for a few minutes until the dough reaches the desired temperature of **28–29°C (82–84°F)**.\n\n\n\n### Step 3 — First Fermentation\n\n#### Recipe\n\nFerment the dough in a warm place at **30°C (86°F)** for **30 minutes**.\n\n\n\n### Step 4 — Divide and Preshape\n\n#### Recipe\n\nDivide the Kashipan dough into **50 g pieces**, and preshape into rounds.\n\n\n\n### Step 5 — Bench Rest\n\n#### Recipe\n\nCover the dough and rest for **20 minutes**.\n\n\n\n### Step 6 — Prepare the Red Bean Filling\n\n#### Recipe\n\nWhile the dough is resting, divide the red bean paste into **50 g portions** and round.\n\n\n\n### Step 7 — Fill and Shape\n\n#### Recipe\n\nFor final shaping, flatten the dough to about **3 inches in diameter**, place the red bean paste on top, and enrobe.\n\nPlace the shaped bun on a tray and flatten slightly.\n\n\n\n### Step 8 — Final Proof\n\n#### Recipe\n\nProof at **35°C (95°F)** for **30 minutes**.\n\n\n\n### Step 9 — Egg Wash and Bake\n\n#### Recipe\n\nEgg wash and bake at **190°C (375°F)** for **10–12 minutes**.\n\n\n\n## Instructor Tips\n\n- Aim for a final dough temperature of **28–29°C (82–84°F)**.\n- Portion both the dough and red bean paste to **50 g each** for even buns.\n- Keep the dough covered during the bench rest so the surface does not dry out.\n\n## Recipe Summary\n\n- Base dough: Kashipan sweet bread dough\n- Batch dough weight: approximately 1,200 g\n- Yield: approximately 24 buns\n- Per bun: 50 g dough + 50 g red bean paste\n- First fermentation: 30 minutes at 30°C (86°F)\n- Bench rest: 20 minutes\n- Final proof: 30 minutes at 35°C (95°F)\n- Bake: 190°C (375°F) for 10–12 minutes"
   },
   {
     "id": "chocolate_chip_cookies",
@@ -38,7 +64,31 @@
       "emoji": "🍪"
     },
     "difficulty": "beginner",
-    "est_time_min": 40,
+    "skills": [
+      "creaming butter and sugar",
+      "drop cookies"
+    ],
+    "total_time_min": 40,
+    "active_time_min": 20,
+    "taste": [
+      "sweet",
+      "chocolate",
+      "buttery"
+    ],
+    "texture": [
+      "chewy",
+      "crisp edges"
+    ],
+    "occasion": [
+      "snack",
+      "dessert",
+      "quick",
+      "entertaining"
+    ],
+    "pairs_with": [
+      "milk",
+      "coffee"
+    ],
     "tags": [
       "cookies",
       "chocolate chip",
@@ -56,7 +106,8 @@
       "vanilla extract",
       "chocolate chips"
     ],
-    "description": "A classic drop cookie with crisp golden edges and a soft, chewy center. Makes about 24 cookies."
+    "summary": "A classic drop cookie with crisp golden edges and a soft, chewy center. Makes about 24 cookies.",
+    "body": "# Chocolate Chip Cookies\n\nA classic drop cookie with crisp golden edges and a soft, chewy center. Makes about 24 cookies.\n\n## Ingredients\n\n- 225 g all-purpose flour\n- 5 g baking soda\n- 4 g fine salt\n- 170 g unsalted butter, softened\n- 150 g granulated sugar\n- 165 g light brown sugar, packed\n- 100 g eggs (about 2 large)\n- 8 g vanilla extract\n- 300 g semisweet chocolate chips\n\n**Total dough:** approximately 1,127 g\n\n## Steps\n\n### Step 1 — Cream the Butter and Sugars\n\n#### Recipe\n\nBeat the softened butter, granulated sugar, and brown sugar on medium speed for **2–3 minutes**, until pale and fluffy. Use butter that is soft but not melted — melted butter makes flatter, denser cookies.\n\n### Step 2 — Add the Eggs and Vanilla\n\n#### Recipe\n\nBeat in the eggs one at a time, then the vanilla, mixing until smooth.\n\n### Step 3 — Combine the Dry Ingredients\n\n#### Recipe\n\nIn a separate bowl, whisk the flour, baking soda, and salt. Add to the wet mixture and mix on low speed **just until no dry streaks remain** — do not overmix.\n\n### Step 4 — Fold in the Chocolate\n\n#### Recipe\n\nFold in the chocolate chips by hand.\n\n### Step 5 — Portion the Dough\n\n#### Recipe\n\nScoop **~47 g mounds** onto parchment-lined trays, spaced about **5 cm (2 in)** apart. For thicker, chewier cookies, chill the dough for **30 minutes to 24 hours** before baking.\n\n### Step 6 — Bake\n\n#### Recipe\n\nBake at **190°C (375°F)** for **9–11 minutes**, until the edges are golden but the centers still look slightly underdone. (Convection: about **175°C / 350°F**; check a minute early.)\n\n### Step 7 — Cool\n\n#### Recipe\n\nLet the cookies set on the tray for **5 minutes**, then transfer to a rack. They finish cooking from residual heat.\n\n## Instructor Tips\n\n- Pull the cookies when the centers still look underbaked — carryover heat sets them into a chewy middle.\n- Chilling the dough deepens flavor and limits spread.\n- Room-temperature (not melted) butter creams properly and gives lift; melted butter spreads flat.\n- Weigh the flour — scooping packs in extra flour and makes cakey, dry cookies.\n\n## Troubleshooting\n\n### Why did my cookies spread too thin?\n\nThe butter was too warm or melted, or the dough wasn't chilled. Chill the dough for 30+ minutes and bake on a cool tray (not a hot one straight from the last batch).\n\n**Related topics:** spread, butter temperature, chilling\n\n### Why are my cookies dry or cakey?\n\nUsually too much flour (measure by weight, not by scooping) or overbaking. Pull them at 9–11 minutes when the centers still look soft.\n\n**Related topics:** flour, measuring, bake time\n\n### How do I make the centers chewier?\n\nSlightly underbake them and lean on brown sugar — its moisture and molasses keep cookies soft. Chilling the dough also helps.\n\n**Related topics:** texture, brown sugar, bake time\n\n## Recipe Summary\n\n- Yield: about 24 cookies (~47 g each)\n- Bake: 190°C (375°F) for 9–11 minutes\n- Optional: chill the dough 30 min+ for thicker cookies\n- Pull when edges are golden and centers look underdone\n- Cool 5 minutes on the tray before moving to a rack"
   },
   {
     "id": "hawaiian_butter_mochi",
@@ -67,7 +118,31 @@
       "emoji": "🍡"
     },
     "difficulty": "beginner",
-    "est_time_min": 70,
+    "skills": [
+      "whisking",
+      "one-bowl baking"
+    ],
+    "total_time_min": 70,
+    "active_time_min": 15,
+    "taste": [
+      "sweet",
+      "coconut"
+    ],
+    "texture": [
+      "chewy",
+      "custardy",
+      "dense"
+    ],
+    "occasion": [
+      "potluck",
+      "snack",
+      "dessert"
+    ],
+    "pairs_with": [
+      "coffee",
+      "tea",
+      "fruit"
+    ],
     "tags": [
       "mochi",
       "butter mochi",
@@ -85,7 +160,8 @@
       "eggs",
       "vanilla extract"
     ],
-    "description": "A chewy, custardy coconut mochi cake made with mochiko (glutinous rice flour) — a Hawaiian potluck classic. Naturally gluten-free. Makes one 9×13 in pan, about 24 squares."
+    "summary": "A chewy, custardy coconut mochi cake made with mochiko (glutinous rice flour) — a Hawaiian potluck classic. Naturally gluten-free. Makes one 9×13 in pan, about 24 squares.",
+    "body": "# Hawaiian Butter Mochi\n\nA chewy, custardy coconut mochi cake made with mochiko (glutinous rice flour) — a Hawaiian potluck classic. Naturally gluten-free. Makes one 9×13 in pan, about 24 squares.\n\n## Ingredients\n\n- 454 g mochiko (glutinous / sweet rice flour), about 1 lb\n- 400 g granulated sugar\n- 10 g baking powder\n- 400 g coconut milk (about one 13.5 oz can)\n- 360 g evaporated milk (about one 12 oz can)\n- 113 g unsalted butter, melted\n- 200 g eggs (about 4 large)\n- 8 g vanilla extract\n- Optional: 30 g shredded coconut, for topping\n\n**Total batter:** approximately 1,945 g\n\n## Steps\n\n### Step 1 — Prepare the Oven and Pan\n\n#### Recipe\n\nPreheat the oven to **175°C (350°F)**. Grease a **9×13 in (23×33 cm)** baking pan well.\n\n### Step 2 — Whisk the Dry Ingredients\n\n#### Recipe\n\nIn a large bowl, whisk together the mochiko, sugar, and baking powder.\n\n### Step 3 — Whisk the Wet Ingredients\n\n#### Recipe\n\nIn another bowl, whisk the eggs, then whisk in the coconut milk, evaporated milk, melted butter, and vanilla until smooth.\n\n### Step 4 — Combine\n\n#### Recipe\n\nPour the wet mixture into the dry and whisk until **completely smooth with no lumps**.\n\n### Step 5 — Fill the Pan\n\n#### Recipe\n\nPour the batter into the prepared pan. If using, sprinkle shredded coconut evenly over the top.\n\n### Step 6 — Bake\n\n#### Recipe\n\nBake at **175°C (350°F)** for about **1 hour**, until the top is golden and the center is set (no longer jiggly). A slower oven may need up to **1 hour 10 minutes**.\n\n### Step 7 — Cool\n\n#### Recipe\n\nCool completely in the pan — at least **1–2 hours** — before cutting into squares. Cutting it warm gives a gummy, sticky mess.\n\n## Instructor Tips\n\n- Cool it fully before cutting; warm butter mochi is gluey and won't hold clean edges.\n- A plastic knife (or a knife wiped clean between cuts) gives the neatest squares.\n- Mochiko — glutinous / sweet rice flour — is essential; regular rice flour or wheat flour won't give the chewy mochi texture.\n- It's even chewier the next day. Store covered at room temperature.\n\n## Troubleshooting\n\n### Why is my butter mochi gummy and hard to cut?\n\nIt was almost certainly cut too soon. Let it cool completely — a few hours — so the starch sets and the squares hold their shape.\n\n**Related topics:** cooling, cutting, texture\n\n### Can I use regular rice flour instead of mochiko?\n\nNo. Only glutinous / sweet rice flour (mochiko) gives the stretchy, chewy crumb. Regular rice flour or wheat flour will not work.\n\n**Related topics:** mochiko, ingredients, texture\n\n### Why is the center still wet?\n\nIt's underbaked. Bake until the middle is set and no longer jiggles — up to about 1 hour 10 minutes in a slower oven.\n\n**Related topics:** bake time, doneness\n\n### How do I store it?\n\nCover at room temperature for 2–3 days; it firms up but stays chewy. Avoid the fridge, which makes it hard.\n\n**Related topics:** storage, texture\n\n## Recipe Summary\n\n- Pan: 9×13 in (23×33 cm), well greased\n- Yield: about 24 squares\n- Key ingredient: mochiko (glutinous / sweet rice flour) — naturally gluten-free\n- Bake: 175°C (350°F) for about 1 hour, until set\n- Cool completely before cutting"
   },
   {
     "id": "shokupan_yudane",
@@ -96,7 +172,34 @@
       "emoji": "🍞"
     },
     "difficulty": "intermediate",
-    "est_time_min": 210,
+    "skills": [
+      "yudane",
+      "dough temperature control",
+      "proofing",
+      "shaping"
+    ],
+    "total_time_min": 210,
+    "active_time_min": 60,
+    "taste": [
+      "mildly sweet",
+      "milky"
+    ],
+    "texture": [
+      "soft",
+      "fluffy",
+      "pillowy"
+    ],
+    "occasion": [
+      "breakfast",
+      "everyday",
+      "sandwiches"
+    ],
+    "pairs_with": [
+      "butter",
+      "jam",
+      "coffee",
+      "tea"
+    ],
     "tags": [
       "bread",
       "milk bread",
@@ -113,7 +216,8 @@
       "milk",
       "prepared yudane"
     ],
-    "description": "A soft Japanese milk bread made using the yudane method. This recipe was adapted from the SFBI Japanese Home Baking Course and keeps the original class wording and instructor guidance as closely as possible."
+    "summary": "A soft Japanese milk bread made using the yudane method. This recipe was adapted from the SFBI Japanese Home Baking Course and keeps the original class wording and instructor guidance as closely as possible.",
+    "body": "# Japanese Milk Bread (Shokupan)\n\nA soft Japanese milk bread made using the yudane method. This recipe was adapted from the SFBI Japanese Home Baking Course and keeps the original class wording and instructor guidance as closely as possible.\n\n## Ingredients\n\n### Yudane\n\n- 26 g low protein bread flour\n- 79 g milk\n\n### Final Dough\n\n- 290 g low protein bread flour\n- 4 g instant dry yeast\n- 25 g sugar\n- 6 g salt\n- 19 g butter\n- 211 g milk\n- 105 g prepared yudane\n\n## Steps\n\n### Step 1 — Prepare the Yudane\n\n#### Recipe\n\nWarm the milk, then combine it with the flour. Cook over medium heat while stirring continuously until the mixture reaches **80°C (175°F)** and develops a texture similar to **soft mochi**.\n\nAllow the yudane to cool completely before using.\n\n\n\n### Step 2 — Mix the Initial Dough\n\n#### Recipe\n\nHold back the butter and yudane. Mix the remaining ingredients using a dough hook.\n\nMix for **4 minutes on low speed**, then **4 minutes on medium speed**, until the dough becomes smooth and begins developing gluten.\n\n\n\n### Step 3 — Add the Yudane\n\n#### Recipe\n\nAdd the cooled yudane and continue mixing on low speed for about **2 minutes**, until it is evenly incorporated.\n\n\n\n### Step 4 — Add the Butter\n\n#### Recipe\n\nAdd the butter and continue mixing on medium speed for **6–8 minutes**.\n\nCheck the dough temperature. The target is **28–29°C (82–84°F)**.\n\nThe dough should feel smooth, elastic, and extensible.\n\n\n\n### Step 5 — First Fermentation\n\n#### Recipe\n\nBulk ferment at **30°C (86°F)** for approximately **45 minutes**.\n\nWatch the dough rather than relying only on the timer.\n\n\n\n### Step 6 — Divide and Preshape\n\n#### Recipe\n\nDivide the dough into **two 325 g pieces**.\n\nDegas gently and preshape each piece into a round.\n\n\n\n### Step 7 — Bench Rest\n\n#### Recipe\n\nLet the dough rest for **15 minutes** at room temperature.\n\n\n\n### Step 8 — Final Shape\n\n#### Recipe\n\nShape each dough piece into a cylinder while removing large air pockets.\n\nPlace the shaped pieces into the prepared pan.\n\n\n\n### Step 9 — Final Proof\n\n#### Recipe\n\nProof for **40–60 minutes**.\n\nThe dough is ready when it reaches **approximately 80% of the height of the pan**.\n\n\n\n### Step 10 — Bake\n\n#### Recipe\n\nBake at **190°C (375°F)** in a **convection oven** for **30–35 minutes** with the lid on.\n\nIf using a **conventional oven**, increase the baking temperature by approximately **15°C (25°F)** to **205°C (400°F)**.\n\n\n\n### Step 11 — Cool\n\n#### Recipe\n\nRemove the loaf from the pan shortly after baking.\n\nAllow it to cool completely before slicing.\n\n\n\n## Instructor Tips\n\n- Watch the dough, not just the timer.\n- Dough temperature is more important than exact mixing time.\n- Medium heat provides better control when making the yudane.\n- A properly cooked yudane should resemble soft mochi.\n- Cool the loaf completely before slicing.\n\n## Troubleshooting\n\n### Why is my dough sticky?\n\nThis is a relatively high-hydration enriched dough, so some stickiness is expected. Resist adding extra flour unless the dough is truly unmanageable. Focus instead on gluten development and dough temperature.\n\n**Related topics:** hydration, gluten development, mixing, dough temperature\n\n### How do I know if I have mixed enough?\n\nUse the dough temperature and texture as the main indicators. The dough should reach **28–29°C (82–84°F)** and feel smooth, elastic, and extensible.\n\n**Related topics:** mixing, dough temperature, gluten development\n\n### How do I know when the final proof is finished?\n\nThe final proof is complete when the dough reaches approximately **80% of the pan height**. The clock is only a guide.\n\n**Related topics:** proofing, pan height, fermentation\n\n### What should the yudane look like?\n\nThe yudane should become a smooth, thick paste with a texture similar to soft mochi. It should reach **80°C (175°F)** before being removed from the heat.\n\n**Related topics:** yudane, texture, temperature\n\n## Equipment Notes\n\nThis recipe was developed using a convection oven.\n\nA conventional oven does not circulate hot air as efficiently, so increase the baking temperature by approximately **25°F (15°C)**.\n\nAlways use the appearance and doneness of the loaf as the final guide rather than relying only on the timer.\n\n## Recipe Summary\n\n- Yield: 1 loaf\n- Dough pieces: 2 × 325 g\n- Target dough temperature: 28–29°C (82–84°F)\n- First proof: approximately 45 minutes at 30°C (86°F)\n- Bench rest: 15 minutes\n- Final proof: 40–60 minutes, until 80% of pan height\n- Bake: 190°C (375°F) convection or 205°C (400°F) conventional\n- Bake time: 30–35 minutes\n- Cool completely before slicing"
   },
   {
     "id": "roll_cake_v1",
@@ -124,7 +228,33 @@
       "emoji": "🍰"
     },
     "difficulty": "intermediate",
-    "est_time_min": 60,
+    "skills": [
+      "meringue",
+      "folding",
+      "rolling"
+    ],
+    "total_time_min": 60,
+    "active_time_min": 45,
+    "taste": [
+      "sweet",
+      "creamy"
+    ],
+    "texture": [
+      "light",
+      "fluffy",
+      "airy"
+    ],
+    "occasion": [
+      "afternoon tea",
+      "entertaining",
+      "dessert"
+    ],
+    "pairs_with": [
+      "coffee",
+      "tea",
+      "strawberries",
+      "fruit"
+    ],
     "tags": [
       "cake",
       "roll cake",
@@ -143,6 +273,7 @@
       "sugar",
       "vanilla extract"
     ],
-    "description": "A light sponge roll made with separated eggs, a medium-peak meringue, and lightly sweetened whipped cream. This file includes both the cake base and cream filling."
+    "summary": "A light sponge roll made with separated eggs, a medium-peak meringue, and lightly sweetened whipped cream. This file includes both the cake base and cream filling.",
+    "body": "# Japanese Roll Cake\n\nA light sponge roll made with separated eggs, a medium-peak meringue, and lightly sweetened whipped cream. This file includes both the cake base and cream filling.\n\n## Ingredients\n\n### Cake Base — 1 Cake\n\n- 150 g eggs\n- 12 g honey\n- 12 g sugar 1\n- 45 g sugar 2\n- 45 g cake flour, sifted\n- 15 g butter\n\n**Total:** 279 g\n\n### Cream Filling — 1 Cake\n\n- 200 g heavy cream\n- 16 g sugar\n- 1 g vanilla extract, optional\n\n**Total:** 217 g\n\n## Steps\n\n### Step 1 — Bring Ingredients to Room Temperature\n\n#### Recipe\n\nLeave all ingredients at room temperature.\n\n\n\n### Step 2 — Prepare the Pan\n\n#### Recipe\n\nPrepare the baking pan: line with paper at the bottom.\n\nUse a **quarter sheet pan (13 × 9 inches)** for one cake or a **half sheet pan (18 × 13 inches)** for two cakes.\n\n\n\n### Step 3 — Separate the Eggs\n\n#### Recipe\n\nSeparate the egg whites and yolks.\n\n\n\n### Step 4 — Make the Yolk Mixture\n\n#### Recipe\n\nCombine the egg yolks, honey, and sugar 1 together, and whisk by hand until lightened in color.\n\n\n\n### Step 5 — Make the Meringue\n\n#### Recipe\n\nWhip the egg whites and sugar 2 to **medium peak**.\n\n\n\n### Step 6 — Fold the Meringue\n\n#### Recipe\n\nFold the meringue into the yolk mixture in stages.\n\n\n\n### Step 7 — Fold in the Flour\n\n#### Recipe\n\nFold in the flour.\n\n\n\n### Step 8 — Add the Butter\n\n#### Recipe\n\nMelt the butter. Create a liaison with a small portion of the batter and fold it back into the remaining batter.\n\n\n\n### Step 9 — Fill the Pan\n\n#### Recipe\n\nPour the batter into the prepared pan and level the top.\n\n\n\n### Step 10 — Bake\n\n#### Recipe\n\nBake at **170°C (350°F)** for **11–13 minutes**.\n\n\n\n### Step 11 — Make the Cream\n\n#### Recipe\n\nWhip the heavy cream, sugar, and vanilla extract (if used) to a **medium-stiff peak**.\n\nUse immediately.\n\n\n\n### Step 12 — Fill and Roll\n\n#### Recipe\n\nSpread the cream over the cooled cake base and roll the cake.\n\nIf adding a flavor to the cream, add it halfway through whipping. Keep the cream slightly soft, then finish whisking by hand.\n\nIf using fruit, lay the fruit in the middle before rolling.\n\n\n\n## Instructor Tips\n\n- A handwritten note recommends cutting the cake with a knife and cutting the paper separately rather than pulling it away forcefully.\n- Add cream flavoring halfway through whipping.\n- Keep the cream a little soft and finish whisking by hand.\n- Place fruit in the middle before rolling.\n\n## Troubleshooting\n\n### Why did my cake lose volume?\n\nThe batter can deflate if the meringue is overmixed during folding. Fold in stages and stop once the mixture is even.\n\n### What does medium peak mean?\n\nThe meringue should form a peak that holds its shape but bends slightly at the tip.\n\n### Why make a liaison with the melted butter?\n\nMixing the melted butter first with a small amount of batter makes it easier to fold into the full batch without sinking or deflating the foam.\n\n### How stiff should the cream be?\n\nWhip to medium-stiff peak for filling. The cream should hold its shape but remain spreadable so the cake can roll without squeezing out all the filling.\n\n## Recipe Summary\n\n- Pan: quarter sheet pan (13 × 9 in) for 1 cake\n- Cake base: 279 g\n- Cream filling: 217 g\n- Meringue: medium peak\n- Cream: medium-stiff peak\n- Bake: 170°C (350°F) for 11–13 minutes\n- Optional: add flavor halfway through whipping or place fruit in the center"
   }
 ]

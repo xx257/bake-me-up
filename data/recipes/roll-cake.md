@@ -2,6 +2,13 @@
 id: roll_cake_v1
 title: Japanese Roll Cake
 est_time_min: 60
+# Recommendation profile (Planning Mode: embedded in Qdrant for retrieval).
+profile:
+  active_time_min: 45
+  taste: [sweet, creamy]
+  texture: [light, fluffy, airy]
+  occasion: [afternoon tea, entertaining, dessert]
+  pairs_with: [coffee, tea, strawberries, fruit]
 aliases: [roll cake, Japanese roll cake, sponge roll]
 source:
   name: SFBI 2 Day Japanese Home Baking Course

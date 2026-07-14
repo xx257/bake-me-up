@@ -2,6 +2,13 @@
 id: anpan_kashipan_v1
 title: Anpan with Kashipan Sweet Bread Dough
 est_time_min: 120
+# Recommendation profile (Planning Mode: embedded in Qdrant for retrieval).
+profile:
+  active_time_min: 70
+  taste: [sweet, red bean]
+  texture: [soft, fluffy]
+  occasion: [snack, afternoon tea, breakfast]
+  pairs_with: [green tea, coffee, milk]
 aliases: [anpan, red bean bun, Japanese sweet bread]
 source:
   name: SFBI 2 Day Japanese Home Baking Course
