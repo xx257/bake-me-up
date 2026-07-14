@@ -1,6 +1,7 @@
 ---
 id: anpan_kashipan_v1
 title: Anpan with Kashipan Sweet Bread Dough
+est_time_min: 120
 aliases: [anpan, red bean bun, Japanese sweet bread]
 source:
   name: SFBI 2 Day Japanese Home Baking Course

@@ -14,6 +14,7 @@ export type RecipeMeta = {
   tags: string[];
   aliases: string[];
   difficulty?: Difficulty;
+  estTimeMin?: number;
   yieldUnits?: string;
   source?: string;
   category: { label: string; emoji: string };
@@ -126,6 +127,7 @@ function parse(slug: string): Recipe {
     tags,
     aliases: data.aliases ?? [],
     difficulty: data.difficulty,
+    estTimeMin: data.est_time_min,
     yieldUnits: data.yield?.units,
     source: sourceName(data.source),
     category: categoryOf(tags),
@@ -153,6 +155,7 @@ export function getAllRecipes(): RecipeMeta[] {
         tags: r.tags,
         aliases: r.aliases,
         difficulty: r.difficulty,
+        estTimeMin: r.estTimeMin,
         yieldUnits: r.yieldUnits,
         source: r.source,
         category: r.category,

@@ -5,6 +5,7 @@
 
 id: hawaiian_butter_mochi
 title: Hawaiian Butter Mochi
+est_time_min: 70
 aliases:
   - butter mochi
   - Hawaiian butter mochi

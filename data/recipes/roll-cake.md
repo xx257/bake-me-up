@@ -1,11 +1,15 @@
 ---
 id: roll_cake_v1
 title: Japanese Roll Cake
+est_time_min: 60
 aliases: [roll cake, Japanese roll cake, sponge roll]
 source:
   name: SFBI 2 Day Japanese Home Baking Course
   type: instructor_recipe
 tags: [cake, roll cake, sponge cake, whipped cream, meringue]
+difficulty:
+  level: intermediate
+  skills: [meringue, folding, rolling]
 
 yield:
   units: 1 cake

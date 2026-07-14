@@ -4,6 +4,7 @@
 
 id: shokupan_yudane
 title: Japanese Milk Bread (Shokupan)
+est_time_min: 210
 aliases:
   - shokupan
   - Japanese milk bread

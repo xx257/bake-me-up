@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
 
-// Server-side proxy to the LangGraph Platform deployment. Holds the API key so it is
-// never exposed to the browser, and scopes retrieval to the active recipe.
+// Server-side proxy to the LangGraph Platform deployment. Holds the API key (never
+// exposed to the browser) and runs on a per-session thread so the backend checkpointer
+// remembers the conversation (planning goal → baking) across turns and pages.
 const API_URL = process.env.LANGGRAPH_API_URL;
 const API_KEY = process.env.LANGGRAPH_API_KEY;
 
-type Msg = { role: "user" | "assistant"; content: string };
+const headers = () => ({
+  "Content-Type": "application/json",
+  "X-Api-Key": API_KEY as string,
+});
 
 function extractText(content: unknown): string {
   if (typeof content === "string") return content;
@@ -17,6 +21,17 @@ function extractText(content: unknown): string {
   return "";
 }
 
+async function ensureThread(threadId?: string): Promise<string> {
+  if (threadId) return threadId;
+  const res = await fetch(`${API_URL}/threads`, {
+    method: "POST",
+    headers: headers(),
+    body: JSON.stringify({}),
+  });
+  if (!res.ok) throw new Error(`thread create failed: ${await res.text()}`);
+  return (await res.json()).thread_id;
+}
+
 export async function POST(request: Request) {
   if (!API_URL || !API_KEY) {
     return NextResponse.json(
@@ -25,47 +40,44 @@ export async function POST(request: Request) {
     );
   }
 
-  const { messages, recipeId, currentStep } = (await request.json()) as {
-    messages: Msg[];
-    recipeId?: string;
+  const { message, threadId, activeRecipe, currentStep } = (await request.json()) as {
+    message: string;
+    threadId?: string;
+    activeRecipe?: string;
     currentStep?: string;
   };
 
-  // Make the assistant context-aware of where the baker is (v0.2). Injected as a
-  // system message so "what's next?" and step questions resolve without the user
-  // having to restate their progress.
-  const input = currentStep
-    ? [
-        {
-          role: "system",
-          content: `The baker is currently on ${currentStep}. Take that into account — e.g. "what's next?" means the step after this one.`,
+  try {
+    const tid = await ensureThread(threadId);
+    // Inline the current-step context into the turn (keeps the backend aware without
+    // piling up system messages in the persisted thread).
+    const content = currentStep ? `[Context: I'm on ${currentStep}] ${message}` : message;
+
+    const res = await fetch(`${API_URL}/threads/${tid}/runs/wait`, {
+      method: "POST",
+      headers: headers(),
+      body: JSON.stringify({
+        assistant_id: "agent",
+        input: {
+          messages: [{ role: "user", content }],
+          active_recipe: activeRecipe ?? null,
         },
-        ...messages,
-      ]
-    : messages;
+      }),
+    });
+    if (!res.ok) {
+      return NextResponse.json({ error: `Backend error: ${await res.text()}` }, { status: 502 });
+    }
 
-  const upstream = await fetch(`${API_URL}/runs/wait`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "X-Api-Key": API_KEY },
-    body: JSON.stringify({
-      assistant_id: "agent",
-      input: {
-        messages: input,
-        active_recipe: recipeId ?? null,
-        context: "",
-      },
-    }),
-  });
-
-  if (!upstream.ok) {
-    return NextResponse.json(
-      { error: `Backend error: ${await upstream.text()}` },
-      { status: 502 },
-    );
+    const data = await res.json();
+    const state = data.values ?? data; // thread run returns final state values
+    const msgs: Array<{ content: unknown }> = state.messages ?? [];
+    return NextResponse.json({
+      threadId: tid,
+      reply: extractText(msgs[msgs.length - 1]?.content),
+      mode: state.mode ?? null,
+      recommendations: state.recommendations ?? [],
+    });
+  } catch (e) {
+    return NextResponse.json({ error: String(e) }, { status: 502 });
   }
-
-  const data = await upstream.json();
-  const msgs: Array<{ content: unknown }> = data.messages ?? [];
-  const reply = extractText(msgs[msgs.length - 1]?.content);
-  return NextResponse.json({ reply });
 }

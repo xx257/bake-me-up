@@ -25,3 +25,5 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["agent"]
+# Ensure the generated recipe catalog ships in the deployed package (the planner reads it).
+force-include = { "agent/catalog.json" = "agent/catalog.json" }

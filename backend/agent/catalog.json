@@ -1,0 +1,148 @@
+[
+  {
+    "id": "anpan_kashipan_v1",
+    "slug": "anpan",
+    "title": "Anpan with Kashipan Sweet Bread Dough",
+    "category": {
+      "label": "Bread",
+      "emoji": "🍞"
+    },
+    "difficulty": "intermediate",
+    "est_time_min": 120,
+    "tags": [
+      "bread",
+      "sweet bread",
+      "kashipan",
+      "anpan",
+      "red bean"
+    ],
+    "ingredients": [
+      "low protein bread flour",
+      "cake flour",
+      "instant dry yeast",
+      "sugar",
+      "salt",
+      "dry milk solids",
+      "eggs",
+      "water",
+      "butter"
+    ],
+    "description": "Anpan made from the course's Kashipan sweet bread dough, filled with red bean paste. The complete base dough is included here so this recipe can be used independently."
+  },
+  {
+    "id": "chocolate_chip_cookies",
+    "slug": "chocolate-chip-cookies",
+    "title": "Chocolate Chip Cookies",
+    "category": {
+      "label": "Cookies",
+      "emoji": "🍪"
+    },
+    "difficulty": "beginner",
+    "est_time_min": 40,
+    "tags": [
+      "cookies",
+      "chocolate chip",
+      "dessert",
+      "drop cookies"
+    ],
+    "ingredients": [
+      "all-purpose flour",
+      "baking soda",
+      "salt",
+      "butter",
+      "granulated sugar",
+      "brown sugar",
+      "eggs",
+      "vanilla extract",
+      "chocolate chips"
+    ],
+    "description": "A classic drop cookie with crisp golden edges and a soft, chewy center. Makes about 24 cookies."
+  },
+  {
+    "id": "hawaiian_butter_mochi",
+    "slug": "hawaiian-butter-mochi",
+    "title": "Hawaiian Butter Mochi",
+    "category": {
+      "label": "Mochi",
+      "emoji": "🍡"
+    },
+    "difficulty": "beginner",
+    "est_time_min": 70,
+    "tags": [
+      "mochi",
+      "butter mochi",
+      "dessert",
+      "gluten-free",
+      "coconut"
+    ],
+    "ingredients": [
+      "mochiko",
+      "granulated sugar",
+      "baking powder",
+      "coconut milk",
+      "evaporated milk",
+      "butter",
+      "eggs",
+      "vanilla extract"
+    ],
+    "description": "A chewy, custardy coconut mochi cake made with mochiko (glutinous rice flour) — a Hawaiian potluck classic. Naturally gluten-free. Makes one 9×13 in pan, about 24 squares."
+  },
+  {
+    "id": "shokupan_yudane",
+    "slug": "japanese-milk-bread",
+    "title": "Japanese Milk Bread (Shokupan)",
+    "category": {
+      "label": "Bread",
+      "emoji": "🍞"
+    },
+    "difficulty": "intermediate",
+    "est_time_min": 210,
+    "tags": [
+      "bread",
+      "milk bread",
+      "shokupan",
+      "yudane",
+      "enriched dough"
+    ],
+    "ingredients": [
+      "low protein bread flour",
+      "instant dry yeast",
+      "sugar",
+      "salt",
+      "butter",
+      "milk",
+      "prepared yudane"
+    ],
+    "description": "A soft Japanese milk bread made using the yudane method. This recipe was adapted from the SFBI Japanese Home Baking Course and keeps the original class wording and instructor guidance as closely as possible."
+  },
+  {
+    "id": "roll_cake_v1",
+    "slug": "roll-cake",
+    "title": "Japanese Roll Cake",
+    "category": {
+      "label": "Cake",
+      "emoji": "🍰"
+    },
+    "difficulty": "intermediate",
+    "est_time_min": 60,
+    "tags": [
+      "cake",
+      "roll cake",
+      "sponge cake",
+      "whipped cream",
+      "meringue"
+    ],
+    "ingredients": [
+      "eggs",
+      "honey",
+      "sugar 1",
+      "sugar 2",
+      "cake flour",
+      "butter",
+      "heavy cream",
+      "sugar",
+      "vanilla extract"
+    ],
+    "description": "A light sponge roll made with separated eggs, a medium-peak meringue, and lightly sweetened whipped cream. This file includes both the cake base and cream filling."
+  }
+]

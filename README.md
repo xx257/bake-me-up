@@ -1,11 +1,13 @@
 # Bake Me Up 🍞
 
-An AI-powered baking companion that turns a shared recipe into an interactive,
-step-by-step session. It answers questions grounded in *your* recipe, explains
-techniques, searches the web when the recipe doesn't cover it, and generates exact
-ingredient scaling and a dependency-aware bake timeline.
+An AI-powered baking companion. It starts from *what you want to bake* — recommends a
+recipe from the library for your goal, then coaches you through it step-by-step,
+answering grounded in that recipe and falling back to general baking knowledge when the
+library doesn't cover it.
 
 > AI Makerspace Certification Challenge v1.0 project.
+>
+> **Live:** [bake-me-up.vercel.app](https://bake-me-up.vercel.app)
 
 ## Problem
 
@@ -15,12 +17,12 @@ knowledge needed to execute each step correctly. See [`docs/01-problem.md`](docs
 
 ## Architecture
 
-- **Frontend:** Next.js on Vercel (runs on phone + laptop in a browser)
-- **Agent:** Python LangGraph on **LangGraph Platform** (managed via LangSmith), with a managed Postgres checkpointer for memory
+- **Frontend:** Next.js on Vercel — Kitchen (AI planning) → Recipes → Recipe Detail → Guided Baking
+- **Agent:** Python LangGraph on **LangGraph Platform** (via LangSmith). Router → **plan** (recommend from the recipe catalog) / **recipe_qa** (grounded RAG) / **general** (fallback). Per-session **thread** memory (managed Postgres) carries the goal from planning into baking.
 - **LLM:** OpenAI (gpt-4o / gpt-4o-mini) behind the **Vercel AI Gateway**
-- **Retrieval:** Qdrant Cloud vector store, OpenAI embeddings; hybrid + rerank
-- **Tools:** Tavily web search, deterministic `scale()` and `timeline()`
-- **Monitoring:** LangSmith · **Eval:** RAGAS + custom + LLM-judge
+- **Retrieval:** Qdrant Cloud vector store + OpenAI embeddings (dense, filtered to the active recipe)
+- **Next:** Tavily web search, deterministic `scale()` / `timeline()`, no-RAG workflow engine
+- **Monitoring:** LangSmith · **Eval:** RAGAS + recommendation + LLM-judge
 
 Full write-up: [`docs/02-solution.md`](docs/02-solution.md).
 
@@ -33,8 +35,7 @@ Full write-up: [`docs/02-solution.md`](docs/02-solution.md).
 
 ## Status
 
-- [x] **Day 1** (Sun 7/12) — Product definition & architecture
-- [ ] **Day 2** (Mon 7/13) — Vertical slice: deployed RAG + memory + chat, end-to-end
-- [ ] **Day 3** (Tue 7/14) — Complete MVP: scaling + timeline tools, baseline eval; feature freeze
-- [ ] **Day 4** (Wed 7/15) — Retrieval improvements + polish + docs + Loom
-- [ ] **Day 5** (Thu 7/16) — Release & submit *(deadline 7pm ET)*
+- [x] **Day 1** — Product definition & architecture
+- [x] **Day 2** — Vertical slice deployed end-to-end (RAG + memory + chat), both ends live
+- [x] **Agentic v1** — Kitchen planning + recipe recommendations, router (plan / recipe_qa / general), thread memory, Guided Baking
+- [ ] **Next** — Tavily fallback, `scale()` / `timeline()`, no-RAG workflow engine, eval (RAGAS + recommendation + LLM-judge), Loom + write-up

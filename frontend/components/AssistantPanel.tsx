@@ -5,6 +5,7 @@ import { Send } from "lucide-react";
 import { toast } from "sonner";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { useSession } from "@/components/SessionProvider";
 import { formatMinutes } from "@/lib/format";
 
 type Msg = { role: "user" | "assistant"; content: string };
@@ -25,7 +26,7 @@ export default function AssistantPanel({
   recipeId,
   recipeTitle,
   difficulty,
-  totalMinutes,
+  estTimeMin,
   stepCount,
   suggestions,
   currentStep,
@@ -33,12 +34,14 @@ export default function AssistantPanel({
   recipeId: string;
   recipeTitle: string;
   difficulty?: string;
-  totalMinutes: number;
+  estTimeMin?: number;
   stepCount: number;
   suggestions: string[];
   currentStep?: CurrentStep;
 }) {
+  const { threadId, setThreadId } = useSession();
   const [messages, setMessages] = useState<Msg[]>([]);
+  const [mode, setMode] = useState<string | null>(null);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -53,8 +56,7 @@ export default function AssistantPanel({
   async function send(text: string) {
     const q = text.trim();
     if (!q || loading) return;
-    const next: Msg[] = [...messages, { role: "user", content: q }];
-    setMessages(next);
+    setMessages((m) => [...m, { role: "user", content: q }]);
     setInput("");
     setLoading(true);
     try {
@@ -62,8 +64,9 @@ export default function AssistantPanel({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: next,
-          recipeId,
+          message: q,
+          threadId,
+          activeRecipe: recipeId,
           currentStep: currentStep
             ? `Step ${currentStep.index}/${currentStep.total}: ${currentStep.title}` +
               (currentStep.next
@@ -73,8 +76,10 @@ export default function AssistantPanel({
         }),
       });
       if (!res.ok) throw new Error(await res.text());
-      const data = await res.json();
-      setMessages((m) => [...m, { role: "assistant", content: data.reply }]);
+      const d = await res.json();
+      if (d.threadId) setThreadId(d.threadId);
+      setMode(d.mode);
+      setMessages((m) => [...m, { role: "assistant", content: d.reply }]);
     } catch {
       toast.error("The assistant couldn't respond. Please try again.");
     } finally {
@@ -85,6 +90,12 @@ export default function AssistantPanel({
   const base = suggestions.length ? suggestions : FALLBACK_SUGGESTIONS;
   const chips = (currentStep ? ["What's next?", ...base] : base).slice(0, 4);
 
+  const status = currentStep
+    ? `Baking · Step ${currentStep.index}/${currentStep.total}: ${currentStep.title}`
+    : mode === "general"
+      ? "Using general baking knowledge"
+      : `Grounded in ${recipeTitle}`;
+
   return (
     <div className="flex h-[70vh] max-h-[640px] flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
       <div className="border-b border-border px-4 py-3">
@@ -92,11 +103,7 @@ export default function AssistantPanel({
           <span aria-hidden>🍞</span>
           <div className="text-sm font-medium">Bake Me Up</div>
         </div>
-        <div className="mt-0.5 truncate text-xs text-muted">
-          {currentStep
-            ? `Baking · Step ${currentStep.index}/${currentStep.total}: ${currentStep.title}`
-            : `Grounded in ${recipeTitle}`}
-        </div>
+        <div className="mt-0.5 truncate text-xs text-muted">{status}</div>
       </div>
 
       <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
@@ -114,10 +121,10 @@ export default function AssistantPanel({
                   <span>{stepCount} steps</span>
                 </>
               )}
-              {totalMinutes > 0 && (
+              {estTimeMin && (
                 <>
                   <span aria-hidden>·</span>
-                  <span>~{formatMinutes(totalMinutes)}</span>
+                  <span>~{formatMinutes(estTimeMin)}</span>
                 </>
               )}
             </div>

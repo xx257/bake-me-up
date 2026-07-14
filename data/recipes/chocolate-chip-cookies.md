@@ -5,6 +5,7 @@
 
 id: chocolate_chip_cookies
 title: Chocolate Chip Cookies
+est_time_min: 40
 aliases:
   - chocolate chip cookies
   - choc chip cookies

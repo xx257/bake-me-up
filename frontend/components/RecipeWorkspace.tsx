@@ -30,10 +30,10 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
               <span className="capitalize">{recipe.difficulty.level}</span>
             </>
           )}
-          {recipe.totalMinutes > 0 && (
+          {(recipe.estTimeMin ?? recipe.totalMinutes) > 0 && (
             <>
               <span aria-hidden>·</span>
-              <span>~{formatMinutes(recipe.totalMinutes)}</span>
+              <span>~{formatMinutes(recipe.estTimeMin ?? recipe.totalMinutes)}</span>
             </>
           )}
         </div>
@@ -91,7 +91,7 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
             recipeId={recipe.id}
             recipeTitle={recipe.title}
             difficulty={recipe.difficulty?.level}
-            totalMinutes={recipe.totalMinutes}
+            estTimeMin={recipe.estTimeMin ?? recipe.totalMinutes}
             stepCount={recipe.steps.length}
             suggestions={recipe.suggestions}
             currentStep={
