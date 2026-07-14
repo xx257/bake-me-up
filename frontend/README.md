@@ -1,36 +1,47 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Bake Me Up — frontend (Next.js)
 
-## Getting Started
+The web app for the **Bake Me Up** baking companion — the **Choose → Learn → Bake Together**
+journey on phone + laptop. Next.js (App Router) + React + Tailwind v4 on Vercel.
 
-First, run the development server:
+## Getting started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev        # http://localhost:3000
+npm run build      # production build (also runs prebuild: syncs data/recipes → content/recipes)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The chat proxies to the LangGraph backend via `/api/chat`; set the backend URL / key in
+`.env.local` (see the backend README).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## The journey (V0.1)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Kitchen** (`app/page.tsx` → `components/Kitchen.tsx`) — conversation-first planner; the AI
+  is the protagonist, the collection is supporting content.
+- **Recipe Page** (`components/RecipeWorkspace.tsx`) — **Knowledge / "Coach Available."** A
+  recipe-first, single-column reference (hero, ingredients, timeline, steps). The coach is
+  on-demand: a quiet Ask-Coach entry opens a lightweight chat overlay (bottom-sheet on mobile /
+  side panel on desktop), **not** a persistent sidebar.
+- **Baking Together** (`components/BakingTogether.tsx`) — **Experience / "Coach Active."** A
+  full-screen calm instructor: context greeting → current step → *Ready when* / tip →
+  **I'm Ready** → a persistent "Ask me anything" coach. Optimized for confidence, not
+  completion (no progress bar / counter / mark-complete).
 
-## Learn More
+**One agent, one thread.** `components/SessionProvider.tsx` holds a single `threadId` shared by
+every chat surface, so the coach never re-asks what was planned. Session memory is in-memory for
+V0.1 (continuous across navigation; a page refresh starts a fresh thread).
 
-To learn more about Next.js, take a look at the following resources:
+## Key pieces
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `components/AssistantPanel.tsx` — the chat panel (streams from `/api/chat`); `fill` / `bare`
+  props adapt it for the Baking Together and overlay layouts.
+- `lib/recipes.ts` — parses recipe markdown (frontmatter + `#### Workflow` YAML) into structured
+  data (ingredients, timeline, steps, checkpoints, tips).
+- `components/recipe/*` — presentational recipe pieces (hero, meta cards, ingredients, timeline,
+  step card, troubleshooting).
+- Design: warm cream/oat/dusty-rose palette (`app/globals.css`), **Newsreader** display serif
+  for headings, **Geist** for body (both via `next/font`).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Deploy
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Auto-deploys to Vercel on push to `main` → [bake-me-up.vercel.app](https://bake-me-up.vercel.app).

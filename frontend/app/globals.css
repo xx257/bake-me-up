@@ -1,39 +1,96 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@source "../node_modules/streamdown/dist/*.js";
+
+@custom-variant dark (&:is(.dark *));
 @plugin "@tailwindcss/typography";
 
+/* Premium lifestyle palette: cream + espresso + oat neutrals, dusty rose interaction. */
 :root {
-  --background: #faf7f2; /* warm cream */
-  --foreground: #292524; /* stone-800 */
-  --card: #ffffff;
-  --muted: #78716c; /* stone-500 */
-  --border: #ebe5dc;
-  --accent: #d97706; /* amber-600 */
+  --background: #f6f1e8; /* cream */
+  --foreground: #3d322b; /* espresso */
+  --card: #fdfbf5; /* soft cream surface */
+  --card-foreground: #3d322b;
+  --popover: #fdfbf5;
+  --popover-foreground: #3d322b;
+  --primary: #b3777d; /* dusty rose (interaction) */
+  --primary-foreground: #fbf7f0;
+  --secondary: #eae0cf; /* oat */
+  --secondary-foreground: #4d4038;
+  --muted: #eae0cf; /* oat */
+  --muted-foreground: #8c7c6b; /* warm taupe */
+  --accent: #eae0cf;
+  --accent-foreground: #3d322b;
+  --destructive: #b5544a;
+  --border: #e6dccb;
+  --input: #e6dccb;
+  --ring: #b3777d;
+  --radius: 0.85rem;
+  /* Cream is the signature look — keep it even on dark-mode OSes. */
+  color-scheme: light;
+}
+
+/* Dark tokens kept for an opt-in `.dark` toggle later — not auto-applied. */
+.dark {
+  --background: #262019; /* espresso */
+  --foreground: #ede4d6;
+  --card: #302820;
+  --card-foreground: #ede4d6;
+  --popover: #302820;
+  --popover-foreground: #ede4d6;
+  --primary: #cd9297; /* lighter dusty rose on dark */
+  --primary-foreground: #262019;
+  --secondary: #3a3128;
+  --secondary-foreground: #ede4d6;
+  --muted: #3a3128;
+  --muted-foreground: #b3a390;
+  --accent: #3a3128;
+  --accent-foreground: #ede4d6;
+  --destructive: #d9695c;
+  --border: #493e30;
+  --input: #493e30;
+  --ring: #cd9297;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
-  --color-border: var(--border);
+  --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, monospace;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #1c1917; /* stone-900 */
-    --foreground: #f5f5f4;
-    --card: #26221f;
-    --muted: #a8a29e;
-    --border: #3a3531;
-    --accent: #f59e0b; /* amber-500 */
+/* Editorial display serif for headings (resolves the Next.js font var at runtime). */
+.font-display {
+  font-family: var(--font-newsreader), Georgia, "Times New Roman", serif;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/40;
   }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans), system-ui, sans-serif;
+  body {
+    font-family: var(--font-geist-sans), "Geist", ui-sans-serif, system-ui, sans-serif;
+    @apply bg-background text-foreground;
+  }
 }

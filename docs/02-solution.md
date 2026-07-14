@@ -15,11 +15,19 @@ The experience begins with the user's goal, not the recipe grid.
 1. **Kitchen** — describe a goal (time, ingredients, occasion, skill level).
 2. **AI planning** — extract intent → retrieve matching recipe **profiles** → rank &
    explain the best picks, each with a short "why".
-3. **Choose a recipe** → recipe detail.
-4. **Start Baking** → **Guided Baking** mode (one step at a time, progress, prev/next).
+3. **Choose a recipe** → **Recipe Page** (Knowledge, *Coach Available*): a recipe-first
+   reference to understand and prepare; the coach is secondary and on-demand.
+4. **Start Baking** → **Baking Together** (Experience, *Coach Active*): a full-screen calm
+   instructor — context greeting → current step → *Ready when* / tip → **I'm Ready**, with a
+   persistent "Ask me anything" coach. Optimized for **confidence, not completion**.
 5. **AI coach** — loads the **full recipe into context**, aware of the current step, and
    **remembers the planning goal** across the session (thread memory);
    **general-knowledge fallback** when nothing in the library matches.
+
+**Two surfaces, two jobs.** The Recipe Page answers "what do I do?" (structure); the coach
+answers "what if something goes wrong?" (flexibility). On the Recipe Page the coach is
+*available* (a quiet Ask-Coach overlay); in Baking Together the coach is *active* (the primary
+experience). A single agent and one per-session thread span both, so context never repeats.
 
 **Supporting / next:** Tavily web search, `scale()`, `timeline()`, and a deterministic
 workflow engine (walk the per-step `next_step` chain) — none block the MVP.
@@ -34,7 +42,7 @@ deployment — the full cert-required stack.
 ```mermaid
 flowchart LR
     subgraph Client [Browser - phone + laptop]
-        UI[Next.js app on Vercel<br/>Kitchen · Recipes · Guided Baking]
+        UI[Next.js app on Vercel<br/>Kitchen · Recipe Page · Baking Together]
     end
     subgraph Backend [LangGraph Platform · LangSmith]
         RT[Router]
@@ -66,7 +74,7 @@ flowchart LR
 
 | Component          | Choice                          | Rationale (one line)                                                        |
 |--------------------|---------------------------------|----------------------------------------------------------------------------|
-| User interface     | Next.js on Vercel               | Recipe-first app (Kitchen → Recipes → Guided Baking) on phone + laptop      |
+| User interface     | Next.js on Vercel               | Journey app (Kitchen → Recipe Page → Baking Together) on phone + laptop     |
 | Agent framework    | LangGraph (Python)              | Explicit graph gives controllable routing across lanes + built-in memory    |
 | Router             | LLM classifier (gpt-4o-mini)    | Recipe active → bake; else plan or general                                  |
 | Recipe catalog     | Committed `catalog.json`        | Ships profile fields (for planning) + full recipe bodies (for the coach) with the deploy |
@@ -112,7 +120,7 @@ recipe is active it goes straight to **bake**; with no recipe it picks **plan** 
 - **Baking Mode (bake)** loads the **full normalized recipe markdown** into the coach's
   context and reasons over the whole workflow — no per-question retrieval (one recipe fits
   the window, and coaching benefits from seeing every step). It stays grounded in that
-  recipe, weaving in general knowledge only for genuine gaps; Guided Baking passes the
+  recipe, weaving in general knowledge only for genuine gaps; Baking Together passes the
   current + next step so "what's next?" resolves exactly.
 - **General** answers from general baking knowledge and notes the recipe isn't in the
   user's library yet.

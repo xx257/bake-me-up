@@ -28,9 +28,10 @@ def retrieve(query: str, recipe_id: str | None = None, k: int = 4) -> list[Docum
     return store.similarity_search(query, k=k, filter=qdrant_filter)
 
 
-def retrieve_profiles(query: str, k: int = 4) -> list[dict]:
+def retrieve_profiles(query: str, k: int = 4, score_floor: float = 0.0) -> list[dict]:
     """Planning Mode: semantic search over recipe profiles. Returns payloads (catalog
-    entries minus body) for the ranker + UI cards."""
+    entries minus body) whose cosine score clears `score_floor` — so genuinely off-topic
+    queries return nothing rather than the least-bad recipe."""
     import os
 
     from .config import get_embeddings, get_qdrant_client
@@ -40,7 +41,7 @@ def retrieve_profiles(query: str, k: int = 4) -> list[dict]:
     hits = get_qdrant_client().query_points(
         collection_name=collection, query=vector, limit=k
     ).points
-    return [h.payload for h in hits]
+    return [h.payload for h in hits if h.score >= score_floor]
 
 
 def format_context(docs: list[Document]) -> str:

@@ -21,7 +21,7 @@ export default async function RecipePage({
     <main className="mx-auto w-full max-w-6xl px-5 py-8">
       <Link
         href="/"
-        className="mb-6 inline-flex items-center gap-1 text-sm text-muted transition hover:text-accent"
+        className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground transition hover:text-primary"
       >
         <ChevronLeft className="h-4 w-4" /> All recipes
       </Link>

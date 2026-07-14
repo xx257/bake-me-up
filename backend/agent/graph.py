@@ -35,6 +35,7 @@ class State(TypedDict):
     active_recipe: str | None
     mode: Mode
     recommendations: list
+    tool: dict | None  # visible "tool call" from the plan lane (for the UI)
     context: str
 
 
@@ -60,18 +61,26 @@ class _Route(BaseModel):
 
 def route_node(state: State) -> dict:
     # Baking Mode: a recipe is selected, so always coach over that recipe (the full
-    # markdown is in context and can draw on general knowledge as needed).
+    # markdown is in context and can draw on general knowledge as needed). Clear any
+    # stale tool card from an earlier planning turn on this thread.
     if state.get("active_recipe"):
-        return {"mode": "bake"}
+        return {"mode": "bake", "tool": None}
 
     # No recipe selected (Kitchen): plan a bake, or answer generally if nothing matches.
     router = get_chat_llm(mini=True).with_structured_output(_Route)
     system = SystemMessage(
         content=(
-            "Route a baking assistant's turn (no recipe is selected):\n"
-            "- plan: the user is describing what they want to bake / asking for a recommendation.\n"
-            "- general: a baking question that isn't about choosing a recipe from the library.\n"
-            f"Library: {_library_titles()}.\n"
+            "Route a baking assistant's turn (no recipe is selected). Choose one:\n"
+            "- plan: the user wants to bake something, or to make/find a recipe — whether "
+            "by NAME ('how do I make roll cake', 'anpan', 'I want to bake shokupan') or by "
+            "CONSTRAINTS (time, taste, occasion, ingredients, skill; e.g. 'something quick "
+            "and sweet', 'dessert for friends'). Their library is searched afterward and we "
+            "either recommend a match or say it's not there — so you do NOT need to know "
+            "what's in the library.\n"
+            "- general: a general baking QUESTION that is not about making a specific item — "
+            "a technique, concept, comparison, or general troubleshooting. e.g. 'how do I "
+            "temper chocolate', 'what does folding mean', 'why do cookies spread', 'baking "
+            "soda vs powder'.\n"
             "Return only the mode."
         )
     )
@@ -83,7 +92,7 @@ def route_node(state: State) -> dict:
         mode = "plan"
     if mode == "bake":
         mode = "plan"
-    return {"mode": mode}
+    return {"mode": mode, "tool": None}
 
 
 def _select_lane(state: State) -> str:
@@ -108,8 +117,31 @@ class _Rec(BaseModel):
 
 
 class _Plan(BaseModel):
-    message: str = Field(description="a warm, brief reply introducing the picks")
-    recommendations: list[_Rec] = Field(description="1-3 candidates, best first")
+    message: str = Field(
+        description="a warm, brief reply — introduce the picks, or if none fit, say so kindly"
+    )
+    recommendations: list[_Rec] = Field(
+        default_factory=list,
+        description="0-3 recipes that GENUINELY fit; empty if none of the candidates fit",
+    )
+
+
+def _intent_input(intent: _Intent, goal: str) -> dict:
+    """The planner's 'tool input' — the goal + whatever preferences were extracted."""
+    d: dict = {"request": goal}
+    if intent.taste:
+        d["taste"] = intent.taste
+    if intent.texture:
+        d["texture"] = intent.texture
+    if intent.occasion:
+        d["occasion"] = intent.occasion
+    if intent.difficulty:
+        d["difficulty"] = intent.difficulty
+    if intent.time_limit_min:
+        d["time_limit_min"] = intent.time_limit_min
+    if intent.available_ingredients:
+        d["ingredients"] = intent.available_ingredients
+    return d
 
 
 def _intent_query(intent: _Intent, goal: str) -> str:
@@ -171,32 +203,67 @@ def plan_node(state: State) -> dict:
             ]
         )
     )
-    # 2) retrieve: profile search over Qdrant
-    candidates = retrieve_profiles(_intent_query(intent, goal), k=4)
+    # 2) retrieve: profile search over Qdrant (drop far-off matches)
+    candidates = retrieve_profiles(_intent_query(intent, goal), k=4, score_floor=0.2)
     by_id = {c["id"]: c for c in candidates}
-    # 3) reason: rank + explain over ONLY the candidates
+
+    # Visible "tool call" for the UI: what the planner searched and considered.
+    tool = {
+        "name": "search_collection",
+        "input": _intent_input(intent, goal),
+        "considered": [
+            {
+                "title": c["title"],
+                "category": c["category"]["label"],
+                "difficulty": c.get("difficulty"),
+                "total_time_min": c.get("total_time_min"),
+            }
+            for c in candidates
+        ],
+        "state": "output-available",
+    }
+
+    if not candidates:
+        msg = (
+            "Hmm, I don't have a great match for that in your collection yet 🤔 — want me "
+            "to suggest something else, or you can add that recipe later and I'll totally "
+            "coach you through it! 🧑‍🍳"
+        )
+        return {"messages": [AIMessage(content=msg)], "recommendations": [], "tool": tool}
+
+    # 3) reason: rank + explain over ONLY the candidates (may recommend none)
     planner = get_chat_llm().with_structured_output(_Plan)
     system = SystemMessage(
         content=(
-            "You are Bake Me Up. Recommend from ONLY these candidate recipes for the "
-            "user's goal. Pick 1-3, best first, and say why each fits (respect any time "
-            "limit — total minutes shown). Use only ids listed.\n\nCandidates:\n"
-            + _candidates_block(candidates)
+            "You are Bake Me Up — a warm, casual baking friend 🧑‍🍳. Recommend from ONLY "
+            "these candidate recipes for the user's goal. Recommend ONLY recipes that "
+            "genuinely fit (respect any time limit — total minutes shown); return 0-3, best "
+            "first, each with a short, friendly one-line why. Write the message like you're "
+            "texting a friend — warm and casual, with a light emoji or two (don't overdo "
+            "it). If none genuinely fit, return an empty list and a kind message that the "
+            "collection doesn't have a great match for that. Use only ids listed.\n\n"
+            "Candidates:\n" + _candidates_block(candidates)
         )
     )
     result = planner.invoke([system, *state["messages"]])
     cards = [_card(by_id[r.id], r.why) for r in result.recommendations if r.id in by_id]
-    return {"messages": [AIMessage(content=result.message)], "recommendations": cards}
+    return {
+        "messages": [AIMessage(content=result.message)],
+        "recommendations": cards,
+        "tool": tool,
+    }
 
 
 # ── Baking Mode (full recipe in context) ─────────────────────────────────────
 
 COACH_PROMPT = (
-    "You are Bake Me Up, an experienced, warm baking coach guiding the user through ONE "
-    "recipe. Use the full recipe below and the conversation so far (including any goals "
-    "the user mentioned while planning). Answer grounded in this recipe and cite it by "
-    "name; if something truly isn't covered, say so briefly rather than inventing it. "
-    "Keep the baker moving and confident."
+    "You are Bake Me Up — a warm, encouraging baking friend baking right alongside the "
+    "user through ONE recipe. Keep it casual and friendly, like texting a friend who loves "
+    "to bake, with a light sprinkle of emojis 🧑‍🍳 (a couple per reply, don't overdo it). "
+    "Use the full recipe below and the conversation so far (including any goals they "
+    "mentioned while planning). Answer grounded in this recipe and mention it by name; if "
+    "something truly isn't covered, just say so rather than making it up. Keep them moving "
+    "and confident! 🙌"
 )
 
 
@@ -215,10 +282,11 @@ def bake_node(state: State) -> dict:
 def general_node(state: State) -> dict:
     system = SystemMessage(
         content=(
-            "You are Bake Me Up, a friendly baking expert. The user's question isn't about "
-            "a recipe in their library, so answer from general baking knowledge. Briefly say "
-            "you don't have that recipe in their collection yet and they can add it later for "
-            f"tailored coaching. Their library has: {_library_titles()}."
+            "You are Bake Me Up — a friendly baking buddy 🍞. The user's question isn't "
+            "about a recipe in their library, so answer from general baking knowledge in a "
+            "warm, casual tone with a light touch of emojis (a couple, don't overdo it). "
+            "Gently mention you don't have that one in their collection yet and they can add "
+            f"it later for tailored coaching. Their library has: {_library_titles()}."
         )
     )
     reply = get_chat_llm().invoke([system, *state["messages"]])
