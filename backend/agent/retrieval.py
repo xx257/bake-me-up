@@ -1,0 +1,38 @@
+"""Dense retrieval over the Qdrant recipe corpus (Task 6 baseline).
+
+One variable at a time: this is dense-only. Hybrid (dense + BM25) + rerank is a later
+spike (see docs/03-data.md / docs/evaluation.md).
+"""
+
+from __future__ import annotations
+
+from langchain_core.documents import Document
+
+from .config import get_vectorstore
+
+
+def retrieve(query: str, recipe_id: str | None = None, k: int = 4) -> list[Document]:
+    """Top-k dense matches, optionally filtered to the active recipe.
+
+    langchain-qdrant stores the chunk metadata dict under the `metadata` payload key,
+    so we filter on `metadata.recipe_id`.
+    """
+    store = get_vectorstore()
+    qdrant_filter = None
+    if recipe_id:
+        from qdrant_client.models import FieldCondition, Filter, MatchValue
+
+        qdrant_filter = Filter(
+            must=[FieldCondition(key="metadata.recipe_id", match=MatchValue(value=recipe_id))]
+        )
+    return store.similarity_search(query, k=k, filter=qdrant_filter)
+
+
+def format_context(docs: list[Document]) -> str:
+    """Render retrieved chunks into a grounding block with recipe attribution."""
+    blocks = []
+    for d in docs:
+        title = d.metadata.get("title", "Unknown recipe")
+        section = d.metadata.get("section", "")
+        blocks.append(f"[{title} · {section}]\n{d.page_content}")
+    return "\n\n---\n\n".join(blocks)

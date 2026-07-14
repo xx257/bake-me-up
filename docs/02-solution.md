@@ -78,16 +78,16 @@ flowchart LR
 ```mermaid
 flowchart TD
     U[User message<br/>+ session state] --> R{Agent reasons:<br/>what's needed?}
-    R -->|recipe fact / step| RET[Retrieve from corpus<br/>hybrid + rerank]
+    R -->|recipe fact / how-to| RET[Retrieve from corpus<br/>hybrid + rerank]
     R -->|not in recipe| TAV[Tavily web search]
     R -->|resize amounts| SC[scale tool]
     R -->|schedule bake| TL[timeline tool]
-    R -->|just guidance| MEMc[Use memory<br/>current step]
+    R -->|next step / what's next| WF[Workflow engine<br/>walk next_step chain<br/>deterministic · no RAG]
     RET --> SYN[Synthesize grounded answer]
     TAV --> SYN
     SC --> SYN
     TL --> SYN
-    MEMc --> SYN
+    WF --> SYN
     SYN --> CHK{Deterministic tool<br/>output?}
     CHK -->|yes| HV[Show result for<br/>user confirmation]
     CHK -->|no| OUT[Stream answer + cite recipe]
@@ -98,13 +98,17 @@ flowchart TD
 
 **Input → reasoning → retrieval/tools.** A turn begins with the user's message plus
 persisted session state (active recipe, current step) loaded from the LangGraph
-checkpointer. The agent's router node decides intent: recipe-grounded questions
-trigger **RAG** (hybrid dense + BM25 retrieval over Qdrant, then rerank the top-k);
-questions the corpus can't answer trigger the **Tavily** web-search tool; amount
+checkpointer. When a recipe is selected, its **ordered step graph** — parsed from the
+per-step `#### Workflow` blocks (`next_step` chain + `completion` criteria) — is loaded
+into session state. The agent's router node then decides intent: recipe-grounded
+questions trigger **RAG** (hybrid dense + BM25 retrieval over Qdrant, then rerank the
+top-k); questions the corpus can't answer trigger the **Tavily** web-search tool; amount
 changes call the deterministic **`scale()`** tool; scheduling requests call
-**`timeline()`**, which orders steps by their proof/bake dependencies. Pure guidance
-turns ("what's next?") are answered from memory + the active recipe without external
-calls. Every LLM call routes through the **Vercel AI Gateway**.
+**`timeline()`**, which orders steps by their proof/bake dependencies. Step-navigation
+turns ("what's next?", "am I done with this step?") are handled by a **deterministic
+workflow engine** that walks the `next_step` pointer from `current_step` and surfaces
+that step's `completion` cues — **no RAG**, so navigation is exact and repeatable. Every
+LLM call routes through the **Vercel AI Gateway**.
 
 **Synthesis → human review → output → memory.** Results are synthesized into a single
 grounded answer that cites the source recipe. For the deterministic tools (scaling,

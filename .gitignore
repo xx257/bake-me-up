@@ -28,3 +28,9 @@ yarn-error.log*
 
 # Project plan files (kept local, not tracked)
 *Project_Plan*.md
+
+# Course materials & references (kept local, not tracked)
+references/
+
+# LangGraph dev server local artifacts
+.langgraph_api/

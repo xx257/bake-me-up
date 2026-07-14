@@ -1,0 +1,7 @@
+{
+  "dependencies": ["./backend"],
+  "graphs": {
+    "agent": "agent.graph:graph"
+  },
+  "env": "backend/.env"
+}

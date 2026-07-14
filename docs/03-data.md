@@ -49,6 +49,27 @@ intact means retrieval returns coherent, actionable context (a whole step or the
 ingredient list) instead of a fragment cut mid-instruction, and the attached metadata
 lets the retriever filter to the active recipe.
 
+**Hybrid recipe format — what gets embedded vs parsed.** Recipes use a hybrid file
+format (YAML frontmatter for tools/routing + a prose body for RAG; see
+[`../data/recipes/TEMPLATE.md`](../data/recipes/TEMPLATE.md) and the worked example
+[`../data/recipes/japanese-milk-bread.md`](../data/recipes/japanese-milk-bread.md)).
+The ingestion pipeline splits the two halves cleanly:
+
+- **Frontmatter** (`scale`, `yield`, `equipment`, `entry_step`, …) is parsed for the
+  deterministic tools (`scale()`, `timeline()`) and routing — **not embedded**.
+- **Prose body is embedded:** `## Ingredients`, each step's `#### Recipe`, `## Instructor
+  Tips`, `## Troubleshooting`, and `## Recipe Summary`.
+- **Per-step `#### Workflow` YAML blocks are stripped out of the embedded text** and
+  parsed into the step graph (`id` → `next_step` chain + `completion` criteria) that the
+  no-RAG workflow engine walks for "what's next?". Embedding those blocks would pollute
+  retrieval with low-value YAML — the same reason the earlier pure-YAML recipe drafts
+  were poor RAG fodder.
+- `TEMPLATE.md` and `README.md` are skipped entirely.
+
+"Hero" recipes carry the per-step `#### Workflow` blocks (guided workflow + `timeline()`);
+"lite" recipes omit them and contribute prose + `scale` only. Either way, only the prose
+is embedded, so the retrieval baseline is unaffected by the tier.
+
 **Chunking is held constant across the Task 6 experiment.** Structure-aware chunks are
 a deliberate production choice, so we do *not* vary chunking between baseline and
 improved runs — that would change two things at once. Instead we hold the chunks fixed
