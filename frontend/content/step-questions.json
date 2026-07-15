@@ -1,0 +1,491 @@
+{
+  "anpan": [
+    {
+      "title": "Mix the Initial Kashipan Dough",
+      "note": "Focus on developing the gluten by mixing thoroughly. The dough should pull away from the bowl and feel smooth. If it looks shaggy or tears easily, mix a little longer before moving on.",
+      "questions": [
+        "How sticky should the dough feel after mixing?",
+        "What if the dough isn’t coming together smoothly?",
+        "Should I scrape down the bowl during mixing?"
+      ]
+    },
+    {
+      "title": "Add the Butter",
+      "note": "Add the butter in small pieces to help it incorporate evenly. The dough may look greasy or separate at first, but keep mixing until it becomes smooth and elastic again. Temperature is key for proper gluten structure.",
+      "questions": [
+        "How should I add the butter—chunks or softened?",
+        "What if the dough gets too warm while mixing?",
+        "How do I check the dough temperature accurately?"
+      ]
+    },
+    {
+      "title": "First Fermentation",
+      "note": "Cover the bowl to prevent the dough from drying out. The dough should become slightly puffy during fermentation. If your space is cooler, fermentation may take a bit longer.",
+      "questions": [
+        "How can I keep the dough at 30°C if my kitchen is cool?",
+        "What container should I use for fermenting?",
+        "How do I tell if fermentation is complete?"
+      ]
+    },
+    {
+      "title": "Divide and Preshape",
+      "note": "Use a scale for precise portioning. When preshaping, create surface tension by cupping your hand and rotating the dough on the counter. This helps with final shaping later.",
+      "questions": [
+        "How do I make each piece exactly 50g?",
+        "What’s the best technique for rounding the dough?",
+        "Should I flour my hands or the counter for preshaping?"
+      ]
+    },
+    {
+      "title": "Bench Rest",
+      "note": "Cover the dough to prevent a skin from forming. The bench rest allows the gluten to relax, making shaping easier and reducing tearing during the next step.",
+      "questions": [
+        "What should I cover the dough with?",
+        "Can I rest the dough longer than 20 minutes?",
+        "How do I know if the dough is ready after resting?"
+      ]
+    },
+    {
+      "title": "Prepare the Red Bean Filling",
+      "note": "Portion the red bean paste using a scale for even filling. Rounding each piece helps with even distribution inside the dough. If the paste is sticky, lightly oil your hands.",
+      "questions": [
+        "How do I stop the red bean paste from sticking?",
+        "Can I prepare the filling portions ahead of time?",
+        "Should the filling be cold or room temperature?"
+      ]
+    },
+    {
+      "title": "Fill and Shape",
+      "note": "Flatten the dough evenly to avoid thin spots. Place the filling in the center and gently pull the edges over to seal. Pinch seams well to prevent leakage during baking.",
+      "questions": [
+        "How do I prevent the filling from leaking out?",
+        "What’s the best way to flatten the bun after shaping?",
+        "Should the seam be on top or bottom when placing on the tray?"
+      ]
+    },
+    {
+      "title": "Final Proof",
+      "note": "Keep the proofing environment humid to prevent skin from forming. The buns should look slightly puffy and soft after proofing, but not doubled in size.",
+      "questions": [
+        "How do I create a humid proofing environment?",
+        "What if my proofing temperature is lower than 35°C?",
+        "How should the buns look after proofing?"
+      ]
+    },
+    {
+      "title": "Egg Wash and Bake",
+      "note": "Apply a thin, even layer of egg wash for a shiny finish. Bake until the buns are golden brown. If they brown too quickly, tent with foil to prevent over-browning.",
+      "questions": [
+        "How do I make the egg wash?",
+        "Where should I place the tray in the oven?",
+        "How do I check if the buns are fully baked inside?"
+      ]
+    }
+  ],
+  "chocolate-chip-cookies": [
+    {
+      "title": "Cream the Butter and Sugars",
+      "note": "Creaming incorporates air, making the cookies light and giving them structure. The butter should look pale and fluffy, not greasy or soupy. If the mixture seems dense or grainy, keep beating until it smooths out.",
+      "questions": [
+        "How soft should the butter be before starting?",
+        "What if my butter started to melt?",
+        "Can I use a hand whisk instead of a mixer?"
+      ]
+    },
+    {
+      "title": "Add the Eggs and Vanilla",
+      "note": "Add each egg fully before the next to ensure a smooth, homogenous mixture. If the batter looks curdled after adding eggs, keep mixing—it should come together as you add the vanilla.",
+      "questions": [
+        "Should the eggs be at room temperature?",
+        "How long should I beat after each egg?",
+        "Can I use imitation vanilla extract?"
+      ]
+    },
+    {
+      "title": "Combine the Dry Ingredients",
+      "note": "Whisking the dry ingredients evenly distributes the leavening and salt. When combining with the wet, mix just until you see no more flour. Overmixing can make cookies tough.",
+      "questions": [
+        "Do I need to sift the flour first?",
+        "What if I see small flour streaks?",
+        "Can I use a wooden spoon for mixing?"
+      ]
+    },
+    {
+      "title": "Fold in the Chocolate",
+      "note": "Folding by hand prevents overmixing, which keeps cookies tender. Gently turn the dough over with a spatula until the chips are just evenly distributed. Avoid a heavy hand to maintain texture.",
+      "questions": [
+        "Should I use milk or dark chocolate chips?",
+        "How do I fold without overmixing?",
+        "Can I add nuts at this stage?"
+      ]
+    },
+    {
+      "title": "Portion the Dough",
+      "note": "Weighing dough ensures even baking. Chilling helps control spread and enhances flavor, but is optional if you prefer thinner cookies. Space mounds well to prevent sticking together.",
+      "questions": [
+        "How do I portion without a scale?",
+        "Why does chilling affect thickness?",
+        "Can I freeze the dough at this point?"
+      ]
+    },
+    {
+      "title": "Bake",
+      "note": "Bake until edges are golden and centers look slightly underdone—they'll firm as they cool. Ovens vary, so check early. If cookies spread too much, chilling longer can help next time.",
+      "questions": [
+        "How do I know when the edges are done?",
+        "What if my oven runs hot?",
+        "Can I bake two trays at once?"
+      ]
+    },
+    {
+      "title": "Cool",
+      "note": "Letting cookies rest on the tray allows them to finish setting without overbaking. Use a thin spatula to transfer them gently to a rack so they cool evenly and stay intact.",
+      "questions": [
+        "Why wait before moving cookies?",
+        "How do I transfer without breaking?",
+        "How long should they cool on the rack?"
+      ]
+    }
+  ],
+  "hawaiian-butter-mochi": [
+    {
+      "title": "Prepare the Oven and Pan",
+      "note": "Greasing the pan thoroughly prevents sticking, which is especially important with sticky batters like mochi. Use softened butter or a neutral oil, making sure to cover every corner and edge for easy release after baking.",
+      "questions": [
+        "Can I use parchment paper instead of greasing?",
+        "What’s the best way to grease the pan evenly?",
+        "Will a glass or metal pan work better for this?"
+      ]
+    },
+    {
+      "title": "Whisk the Dry Ingredients",
+      "note": "Whisking the dry ingredients ensures the baking powder is evenly distributed, which helps the mochi rise uniformly. Break up any clumps in the mochiko or sugar for a smooth batter later.",
+      "questions": [
+        "Should I sift the mochiko before whisking?",
+        "Is it okay if some sugar clumps remain?",
+        "Can I use a fork instead of a whisk here?"
+      ]
+    },
+    {
+      "title": "Whisk the Wet Ingredients",
+      "note": "Add the melted butter gradually to avoid scrambling the eggs. Whisk until the mixture is completely smooth and uniform—this prevents uneven texture in the finished mochi.",
+      "questions": [
+        "Does the melted butter need to cool first?",
+        "Can I use light coconut milk instead of regular?",
+        "What if my mixture looks a bit curdled?"
+      ]
+    },
+    {
+      "title": "Combine",
+      "note": "Mix until the batter is totally smooth, scraping the bowl as needed. Mochiko can form stubborn lumps, so whisk firmly but don’t overbeat. If lumps persist, press them out with the back of a spoon.",
+      "questions": [
+        "How long should I whisk to get it smooth?",
+        "What’s the best tool for getting rid of lumps?",
+        "Is it okay if tiny lumps remain in the batter?"
+      ]
+    },
+    {
+      "title": "Fill the Pan",
+      "note": "Pour the batter gently to avoid splashing and ensure an even layer. If adding coconut, sprinkle it evenly so every piece has some topping. Tap the pan lightly to level the batter if needed.",
+      "questions": [
+        "Should I tap the pan to remove bubbles?",
+        "How much shredded coconut should I use?",
+        "Can I add other toppings besides coconut?"
+      ]
+    },
+    {
+      "title": "Bake",
+      "note": "Check the mochi at the 1-hour mark: the top should be golden and the center just set. If it jiggles, bake a bit longer. Avoid overbaking, as this can dry out the mochi.",
+      "questions": [
+        "How do I tell if the center is set?",
+        "Should I rotate the pan halfway through baking?",
+        "What if the top browns too quickly?"
+      ]
+    },
+    {
+      "title": "Cool",
+      "note": "Letting the mochi cool fully is crucial for clean slices and the right texture. If you cut it too soon, it will be sticky and gooey. Patience here results in neat, chewy squares.",
+      "questions": [
+        "Can I speed up cooling in the fridge?",
+        "How do I prevent sticking when cutting?",
+        "What’s the best knife for slicing mochi?"
+      ]
+    }
+  ],
+  "japanese-cheesecake": [
+    {
+      "title": "Prepare Ingredients",
+      "note": "Allowing ingredients to reach room temperature promotes even mixing and a smoother batter. Cold ingredients can cause lumps or uneven texture, especially with cream cheese. Separate eggs carefully to avoid yolk in the whites, which can affect the meringue later.",
+      "questions": [
+        "How long should I leave ingredients out?",
+        "What's the best way to separate eggs cleanly?",
+        "Can I use eggs straight from the fridge if in a rush?"
+      ]
+    },
+    {
+      "title": "Make the Cream Cheese Base",
+      "note": "Warm the cream cheese, butter, and milk gently—avoid overheating, which can cause curdling. Whisk constantly for a smooth, lump-free base. Straining removes any stubborn bits for a silky texture.",
+      "questions": [
+        "What if my mixture looks lumpy after heating?",
+        "How do I check the temperature without a thermometer?",
+        "Why do I need to strain the mixture?"
+      ]
+    },
+    {
+      "title": "Make the Meringue",
+      "note": "Whip egg whites in a clean, grease-free bowl for best volume. Add sugar gradually to stabilize the meringue. Medium-soft peaks should curl gently at the tip but not slide off the whisk—avoid overbeating, which makes meringue dry.",
+      "questions": [
+        "How do I know when I've reached medium-soft peaks?",
+        "Can I use a hand whisk instead of a mixer?",
+        "What happens if I overwhip the meringue?"
+      ]
+    },
+    {
+      "title": "Fold the Batter",
+      "note": "Lighten the base by whisking in a third of the meringue first—this helps folding later. Use gentle, sweeping motions to fold in the rest, preserving air for a fluffy cake. Stop folding as soon as the batter looks uniform.",
+      "questions": [
+        "How do I fold without deflating the batter?",
+        "What if I still see streaks after folding?",
+        "Why add the meringue in parts instead of all at once?"
+      ]
+    },
+    {
+      "title": "Pan and Prepare",
+      "note": "Lining the pan prevents sticking and ensures easy unmolding. Tapping and stirring with a skewer releases large bubbles, preventing holes. The water bath provides gentle, even heat, crucial for the cake’s delicate texture.",
+      "questions": [
+        "How do I line a round pan with parchment neatly?",
+        "What temperature should the water bath be exactly?",
+        "Why do I need to use a water bath?"
+      ]
+    },
+    {
+      "title": "Bake",
+      "note": "Bake gently to avoid cracks and ensure a creamy texture. The cake should be lightly colored and have a slight jiggle in the center—overbaking makes it dry. Reduce the temperature as directed for even cooking.",
+      "questions": [
+        "How do I check if the cheesecake is done?",
+        "What if my oven doesn't reach the exact temperatures?",
+        "Why does the temperature need to be lowered halfway?"
+      ]
+    },
+    {
+      "title": "Cool and Serve",
+      "note": "Unmold while warm to prevent sticking and tearing. Peel parchment gently to avoid damaging the sides. Cooling fully sets the texture. Serve as you like—warm for a custardy feel, chilled for a firmer bite.",
+      "questions": [
+        "How do I unmold without breaking the cake?",
+        "How long should I let the cake cool?",
+        "Should I chill it before serving or serve warm?"
+      ]
+    }
+  ],
+  "japanese-milk-bread": [
+    {
+      "title": "Prepare the Yudane",
+      "note": "Stir constantly as you cook the mixture to prevent lumps or scorching. The yudane should become thick, glossy, and stretchy, resembling soft mochi. Use a thermometer to ensure you reach the correct temperature for proper starch gelatinization.",
+      "questions": [
+        "How do I know if my yudane is too thick?",
+        "What if I don't have a thermometer?",
+        "Can I use a microwave to heat the yudane?"
+      ]
+    },
+    {
+      "title": "Mix the Initial Dough",
+      "note": "Mixing without the butter or yudane first helps develop the gluten structure for a better rise. The dough should start to pull away from the bowl and look cohesive but not sticky. If it seems dry or shaggy, pause and check your measurements.",
+      "questions": [
+        "How do I tell if gluten is developing?",
+        "What speed is 'low' and 'medium' on my mixer?",
+        "Should I scrape down the bowl during mixing?"
+      ]
+    },
+    {
+      "title": "Add the Yudane",
+      "note": "Add the yudane in pieces to help it blend evenly into the dough. Mix until there are no visible streaks or lumps of yudane left. If the dough looks uneven, stop and scrape the bowl before continuing.",
+      "questions": [
+        "Should the yudane be at room temperature?",
+        "Is it normal for the dough to become sticky now?",
+        "How do I know the yudane is fully mixed in?"
+      ]
+    },
+    {
+      "title": "Add the Butter",
+      "note": "Add the butter in small portions, letting each piece incorporate before the next. The dough will look greasy at first but should become smooth and elastic. If it feels too warm or sticky, chill briefly before continuing.",
+      "questions": [
+        "What if my dough isn't reaching 28°C?",
+        "How do I check for elasticity?",
+        "Can I use cold butter instead of softened?"
+      ]
+    },
+    {
+      "title": "First Fermentation",
+      "note": "Fermentation time can vary. Look for visible expansion—about doubled in size. If the dough is slow to rise, check your proofing temperature and give it more time as needed.",
+      "questions": [
+        "How do I keep my dough at 30°C?",
+        "What if my dough over-ferments?",
+        "How much should the dough expand?"
+      ]
+    },
+    {
+      "title": "Divide and Preshape",
+      "note": "Use a scale for accuracy when dividing. Gently press out large air bubbles without flattening completely. A round preshape helps with an even final shape later.",
+      "questions": [
+        "How do I degas without tearing the dough?",
+        "What if my pieces aren't exactly 325g?",
+        "Why is preshaping important?"
+      ]
+    },
+    {
+      "title": "Bench Rest",
+      "note": "Resting allows the gluten to relax, making the dough easier to shape. If it resists shaping or springs back, let it rest a few minutes longer.",
+      "questions": [
+        "Should I cover the dough during bench rest?",
+        "What if my dough dries out?",
+        "Can I extend the rest if the dough feels tight?"
+      ]
+    },
+    {
+      "title": "Final Shape",
+      "note": "Shape gently to avoid tearing the dough. Roll tightly enough to eliminate large air pockets but not so tightly that the dough tears. Place seam side down in the pan for a smooth loaf.",
+      "questions": [
+        "How do I spot and remove large air pockets?",
+        "What size should the cylinders be?",
+        "Should the seam be on the bottom in the pan?"
+      ]
+    },
+    {
+      "title": "Final Proof",
+      "note": "Proofing is done when the dough rises to about 80% of the pan’s height. If your kitchen is cool, proof longer. Avoid over-proofing, which can cause collapse during baking.",
+      "questions": [
+        "How do I measure pan height percentage?",
+        "What if the dough rises too quickly?",
+        "Can I proof in the fridge overnight?"
+      ]
+    },
+    {
+      "title": "Bake",
+      "note": "A lidded pan creates a square loaf and a soft crust. Bake until the loaf feels hollow when tapped and is golden brown. Adjust time if your oven runs hot or cool.",
+      "questions": [
+        "How do I check if the loaf is fully baked?",
+        "Should I rotate the pan halfway through?",
+        "Can I bake without a lid?"
+      ]
+    },
+    {
+      "title": "Cool",
+      "note": "Remove the loaf promptly to prevent sogginess from steam. Let it cool fully for the crumb to set and for the best texture when slicing.",
+      "questions": [
+        "How long does it take to cool completely?",
+        "Can I slice while the bread is still warm?",
+        "How should I store the cooled loaf?"
+      ]
+    }
+  ],
+  "roll-cake": [
+    {
+      "title": "Bring Ingredients to Room Temperature",
+      "note": "Allowing ingredients to reach room temperature ensures even mixing and a smoother batter. Cold ingredients can cause the batter to seize or not incorporate properly, affecting texture and rise.",
+      "questions": [
+        "How long should I leave the eggs out?",
+        "What if my butter is still cold?",
+        "Can I speed up warming the milk or eggs?"
+      ]
+    },
+    {
+      "title": "Prepare the Pan",
+      "note": "Lining the pan prevents sticking and ensures the cake releases cleanly. Make sure the paper fits flat against the bottom without wrinkles to keep the cake surface smooth.",
+      "questions": [
+        "What kind of paper should I use?",
+        "How do I get the paper to stay in place?",
+        "Should I grease the pan or the paper?"
+      ]
+    },
+    {
+      "title": "Separate the Eggs",
+      "note": "Separate eggs carefully to avoid any yolk in the whites, as even a small amount of fat can prevent proper meringue formation. Use clean, dry bowls for best results.",
+      "questions": [
+        "What's the best way to separate eggs?",
+        "Can I use my hands to separate them?",
+        "What if some yolk gets into the whites?"
+      ]
+    },
+    {
+      "title": "Make the Yolk Mixture",
+      "note": "Whisking the yolks, honey, and sugar together until light in color incorporates air and dissolves the sugar, creating a stable base. Keep whisking until the mixture looks pale and slightly thickened.",
+      "questions": [
+        "How long should I whisk the yolks and sugar?",
+        "What texture should the mixture have?",
+        "Can I use an electric mixer for this step?"
+      ]
+    },
+    {
+      "title": "Make the Meringue",
+      "note": "Whip the egg whites and sugar until medium peaks form—when you lift the whisk, the peaks should stand up but gently fold over at the tip. Avoid over-whipping, which can make folding difficult.",
+      "questions": [
+        "How do I know I’ve reached medium peaks?",
+        "Should I add sugar all at once or gradually?",
+        "Can I use a hand mixer or does it need to be stand mixer?"
+      ]
+    },
+    {
+      "title": "Fold the Meringue",
+      "note": "Fold the meringue gently in stages to preserve the air you've whipped in. Use a spatula and a light hand—over-mixing will deflate the batter and make the cake dense.",
+      "questions": [
+        "How many stages should I fold in the meringue?",
+        "What folding technique works best?",
+        "How do I avoid streaks or over-mixing?"
+      ]
+    },
+    {
+      "title": "Fold in the Flour",
+      "note": "Sift the flour over the batter and fold gently to avoid lumps. Incorporate fully, but stop as soon as no dry flour remains to prevent deflating the mixture.",
+      "questions": [
+        "Should I sift the flour before or during folding?",
+        "What kind of flour is best for this cake?",
+        "How do I know if I’ve over-mixed?"
+      ]
+    },
+    {
+      "title": "Add the Butter",
+      "note": "Tempering the melted butter with a bit of batter prevents it from sinking or separating. Gently fold the butter-batter mixture into the rest for a light, even texture.",
+      "questions": [
+        "How much batter should I use to make the liaison?",
+        "Does the butter need to be hot or just melted?",
+        "What if the butter sits on top and won’t mix in?"
+      ]
+    },
+    {
+      "title": "Fill the Pan",
+      "note": "Pour the batter into the pan and use an offset spatula or bench scraper to level the surface. An even layer ensures uniform baking and a smooth roll.",
+      "questions": [
+        "How thick should the batter layer be?",
+        "What’s the best tool to level the batter?",
+        "Should I tap the pan to remove bubbles?"
+      ]
+    },
+    {
+      "title": "Bake",
+      "note": "Bake until the cake is just set and springs back lightly when touched. Avoid overbaking, which can make the cake dry and prone to cracking during rolling.",
+      "questions": [
+        "Should I rotate the pan during baking?",
+        "How do I check if the cake is done?",
+        "What’s the best way to cool the cake?"
+      ]
+    },
+    {
+      "title": "Make the Cream",
+      "note": "Whip the cream, sugar, and vanilla until medium-stiff peaks. The cream should hold its shape but still look smooth. Don’t overwhip, or it may turn grainy.",
+      "questions": [
+        "How do I recognize medium-stiff peaks in cream?",
+        "Can I use a chilled bowl for whipping?",
+        "What’s the best way to flavor the cream?"
+      ]
+    },
+    {
+      "title": "Fill and Roll",
+      "note": "Spread the cream evenly, leaving a small border for rolling. Roll the cake gently but firmly to avoid cracks. If using fruit, arrange it in the center for a clean spiral.",
+      "questions": [
+        "How thick should I spread the cream?",
+        "What’s the best way to prevent cracking?",
+        "When should I add fruit for the filling?"
+      ]
+    }
+  ]
+}

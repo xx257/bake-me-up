@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Geist_Mono, Newsreader, Hanken_Grotesk } from "next/font/google";
+import { Inter, Geist_Mono, Newsreader } from "next/font/google";
 import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SessionProvider } from "@/components/SessionProvider";
@@ -9,12 +9,6 @@ import "./globals.css";
 // Warm, literary body face — reads like a collected recipe journal, not a SaaS product.
 const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
-// Modern grotesque for planner/brand headlines (Kitchen hero + nav wordmark); recipes stay serif.
-const hanken = Hanken_Grotesk({
-  variable: "--font-hanken",
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-});
 // Editorial display serif for headings — calm, premium-lifestyle feel.
 const newsreader = Newsreader({
   variable: "--font-newsreader",
@@ -35,7 +29,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${geistMono.variable} ${newsreader.variable} ${hanken.variable} h-full antialiased`}
+      className={`${inter.variable} ${geistMono.variable} ${newsreader.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <TooltipProvider>

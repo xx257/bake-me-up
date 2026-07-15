@@ -74,6 +74,7 @@ export default function Kitchen({ featured }: { featured?: Featured }) {
     const q = text.trim();
     if (!q || loading) return;
     const hadRec = cards.length > 0;
+    const wasStarted = started;
     setStarted(true);
     setInput("");
     setLoading(true);
@@ -101,7 +102,8 @@ export default function Kitchen({ featured }: { featured?: Featured }) {
         recs.length > 0 && cards.length > 0 && recs[0].id === cards[0].id;
       if (recs.length > 0 && !samePick) {
         // First pick, or a different recipe → pin it and reset the attached conversation.
-        setCards(recs);
+        // De-dup by id so a repeated id can't double-render or collide on React keys.
+        setCards(recs.filter((r, i) => recs.findIndex((x) => x.id === r.id) === i));
         setIntro(reply);
         setQa([]);
         setShowEarlier(false);
@@ -118,6 +120,8 @@ export default function Kitchen({ featured }: { featured?: Featured }) {
       }
     } catch {
       toast.error("Couldn't reach the planner. Please try again.");
+      setInput(q); // restore what they typed so they can retry
+      if (!wasStarted) setStarted(false); // failed first search → back to the homepage
     } finally {
       setLoading(false);
       setPendingQ(null);

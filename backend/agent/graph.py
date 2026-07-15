@@ -22,6 +22,7 @@ from typing import Annotated, Literal, TypedDict
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langgraph.graph import START, StateGraph
 from langgraph.graph.message import add_messages
+from langsmith import traceable
 from pydantic import BaseModel, Field
 
 from .catalog import get_body, get_catalog, get_entry
@@ -96,6 +97,30 @@ class _Route(BaseModel):
     mode: Mode = Field(description="plan | bake | general")
 
 
+@traceable(name="classify_followup", run_type="chain")
+def _route_followup(text: str, rec_title: str) -> Mode:
+    """Pinned-pick turn: is this ABOUT the suggested recipe (bake), a new search (plan),
+    or off-topic (general)? Covers the deterministic new-search shortcut + the LLM route."""
+    if _wants_new_search(text):
+        return "plan"
+    router = get_chat_llm(mini=True).with_structured_output(_Route)
+    system = SystemMessage(
+        content=(
+            f"The user is looking at a suggested recipe: {rec_title}. Route their turn:\n"
+            f"- bake: a question or request ABOUT {rec_title} (ingredients, substitutions, "
+            "timing, technique, difficulty, 'why this one', 'tell me more') — we answer "
+            "grounded in it.\n"
+            "- plan: they want a DIFFERENT recipe or another option (a new search).\n"
+            "- general: a general baking question unrelated to this recipe, or off-topic.\n"
+            "Return only the mode."
+        )
+    )
+    try:
+        return router.invoke([system, HumanMessage(content=text)]).mode
+    except Exception:
+        return "bake"
+
+
 def route_node(state: State) -> dict:
     # Recipe page: a recipe is actively selected → always coach over it.
     if state.get("active_recipe"):
@@ -106,25 +131,8 @@ def route_node(state: State) -> dict:
 
     # Kitchen with a pinned recommendation: is this about that pick, or a new search?
     if rec:
-        if _wants_new_search(text):
-            return {"mode": "plan", "tool": None}
         title = _title_for(rec) or "the suggested recipe"
-        router = get_chat_llm(mini=True).with_structured_output(_Route)
-        system = SystemMessage(
-            content=(
-                f"The user is looking at a suggested recipe: {title}. Route their turn:\n"
-                f"- bake: a question or request ABOUT {title} (ingredients, substitutions, "
-                "timing, technique, difficulty, 'why this one', 'tell me more') — we answer "
-                "grounded in it.\n"
-                "- plan: they want a DIFFERENT recipe or another option (a new search).\n"
-                "- general: a general baking question unrelated to this recipe, or off-topic.\n"
-                "Return only the mode."
-            )
-        )
-        try:
-            mode = router.invoke([system, HumanMessage(content=text)]).mode
-        except Exception:
-            mode = "bake"
+        mode = _route_followup(text, title)
         # A re-plan clears the stale tool card; a bake/general follow-up leaves it untouched
         # so the UI keeps the pinned recommendation's retrieval card.
         return {"mode": "plan", "tool": None} if mode == "plan" else {"mode": mode}
@@ -253,6 +261,40 @@ def _card(payload: dict, why: str) -> dict:
     }
 
 
+@traceable(name="rank_recommendations", run_type="chain")
+def _rank(candidates: list[dict], messages) -> _Plan:
+    """Rank + explain over ONLY the retrieved candidates (may recommend none)."""
+    planner = get_chat_llm().with_structured_output(_Plan)
+    system = SystemMessage(
+        content=(
+            "You are Bake Me Up — a calm, confident baking instructor. Recommend the right "
+            "recipe from ONLY these candidates for what the user wants.\n"
+            "- If they've given ANY concrete signal (taste, time, occasion, ingredient, "
+            "category, or a named bake), recommend now: return 1-3 that genuinely fit (respect "
+            "any time limit — total minutes shown), best first.\n"
+            "- Ask a clarifying question ONLY if the request is genuinely too vague to choose "
+            "well AND you have NOT already asked one earlier (check the history). Then return "
+            "an empty list with one short question as the message. Never ask twice.\n"
+            "- If none genuinely fit, return an empty list and say plainly that the collection "
+            "doesn't have a good match.\n"
+            "- When the user names a broad CATEGORY (bread, cake, cookies), prefer the most "
+            "representative example as a SOFT tiebreaker only — the user's explicit constraints "
+            "(time, difficulty, ingredients) always win over that default.\n"
+            "VOICE — the `message` is decisive and editorial, 1-3 sentences: the pick, a brief "
+            "reason, and one practical insight if useful (e.g. 'I'd start with the Anpan. It "
+            "uses the same Kashipan dough, but the process is more forgiving. The dough "
+            "development is the part worth paying attention to.'). No emojis. No filler ('Love "
+            "that', 'Great question', 'Let me know if…'). Sound like you know what you'd choose.\n"
+            "Each `why` is short editorial card copy — crisp fragments grounded ONLY in the "
+            "candidate's data below (taste, texture, good-for, summary, time, difficulty) and "
+            "the user's constraints; invent nothing, and don't repeat the message's reasoning. "
+            "Use only ids listed.\n\n"
+            "Candidates:\n" + _candidates_block(candidates)
+        )
+    )
+    return planner.invoke([system, *messages])
+
+
 def plan_node(state: State) -> dict:
     goal = _last_user_text(state["messages"])
     recent = _recent_user_text(state["messages"], n=3)
@@ -301,35 +343,7 @@ def plan_node(state: State) -> dict:
         return {"messages": [AIMessage(content=msg)], "recommendations": [], "tool": tool}
 
     # 3) reason: rank + explain over ONLY the candidates (may recommend none)
-    planner = get_chat_llm().with_structured_output(_Plan)
-    system = SystemMessage(
-        content=(
-            "You are Bake Me Up — a calm, confident baking instructor. Recommend the right "
-            "recipe from ONLY these candidates for what the user wants.\n"
-            "- If they've given ANY concrete signal (taste, time, occasion, ingredient, "
-            "category, or a named bake), recommend now: return 1-3 that genuinely fit (respect "
-            "any time limit — total minutes shown), best first.\n"
-            "- Ask a clarifying question ONLY if the request is genuinely too vague to choose "
-            "well AND you have NOT already asked one earlier (check the history). Then return "
-            "an empty list with one short question as the message. Never ask twice.\n"
-            "- If none genuinely fit, return an empty list and say plainly that the collection "
-            "doesn't have a good match.\n"
-            "- When the user names a broad CATEGORY (bread, cake, cookies), prefer the most "
-            "representative example as a SOFT tiebreaker only — the user's explicit constraints "
-            "(time, difficulty, ingredients) always win over that default.\n"
-            "VOICE — the `message` is decisive and editorial, 1-3 sentences: the pick, a brief "
-            "reason, and one practical insight if useful (e.g. 'I'd start with the Anpan. It "
-            "uses the same Kashipan dough, but the process is more forgiving. The dough "
-            "development is the part worth paying attention to.'). No emojis. No filler ('Love "
-            "that', 'Great question', 'Let me know if…'). Sound like you know what you'd choose.\n"
-            "Each `why` is short editorial card copy — crisp fragments grounded ONLY in the "
-            "candidate's data below (taste, texture, good-for, summary, time, difficulty) and "
-            "the user's constraints; invent nothing, and don't repeat the message's reasoning. "
-            "Use only ids listed.\n\n"
-            "Candidates:\n" + _candidates_block(candidates)
-        )
-    )
-    result = planner.invoke([system, *state["messages"]])
+    result = _rank(candidates, state["messages"])
     cards = [_card(by_id[r.id], r.why) for r in result.recommendations if r.id in by_id]
     return {
         "messages": [AIMessage(content=result.message)],
@@ -368,13 +382,25 @@ EVALUATE_PROMPT = (
 )
 
 
+@traceable(name="load_recipe_context", run_type="retriever")
+def _load_recipe_context(recipe_id: str) -> str:
+    """Load the full recipe markdown that grounds the coach (no per-question RAG)."""
+    return get_body(recipe_id or "")
+
+
+@traceable(name="select_prompt_mode")
+def _select_prompt_mode(active: bool) -> str:
+    """Coaching an active bake vs. evaluating a suggested recipe the user hasn't started."""
+    return "coach" if active else "evaluate"
+
+
 def bake_node(state: State) -> dict:
     active = state.get("active_recipe")
     recipe_id = active or state.get("current_recommendation")
-    body = get_body(recipe_id or "")
+    body = _load_recipe_context(recipe_id or "")
     if not body:
         return general_node(state)
-    prompt = COACH_PROMPT if active else EVALUATE_PROMPT
+    prompt = COACH_PROMPT if _select_prompt_mode(bool(active)) == "coach" else EVALUATE_PROMPT
     system = SystemMessage(content=f"{prompt}\n\n--- RECIPE ---\n{body}")
     reply = get_chat_llm().invoke([system, *state["messages"]])
     return {"messages": [reply]}

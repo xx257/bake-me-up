@@ -12,11 +12,12 @@ import StepCard from "./recipe/StepCard";
 import GeneralNotes from "./recipe/GeneralNotes";
 import Troubleshooting from "./recipe/Troubleshooting";
 import BakingTogether from "./BakingTogether";
+import BakeComplete from "./BakeComplete";
 import AssistantPanel from "./AssistantPanel";
 import KiwiMark from "./KiwiMark";
 
 export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
-  const [mode, setMode] = useState<"read" | "bake">("read");
+  const [mode, setMode] = useState<"read" | "bake" | "done">("read");
   const [stepIndex, setStepIndex] = useState(0);
   const [coachOpen, setCoachOpen] = useState(false);
   const [autoAsk, setAutoAsk] = useState<string | undefined>();
@@ -58,7 +59,7 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
 
   // Lock the page behind the full-screen bake overlay or the coach sheet.
   useEffect(() => {
-    const lock = mode === "bake" || coachOpen;
+    const lock = mode !== "read" || coachOpen;
     document.body.style.overflow = lock ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
@@ -88,6 +89,21 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
         index={stepIndex}
         onIndex={setStepIndex}
         onExit={() => setMode("read")}
+        onFinish={() => setMode("done")}
+      />
+    );
+  }
+
+  // The calm close once the last step is done.
+  if (mode === "done") {
+    return (
+      <BakeComplete
+        recipe={recipe}
+        onBack={() => setMode("read")}
+        onBakeAgain={() => {
+          setStepIndex(0);
+          setMode("bake");
+        }}
       />
     );
   }

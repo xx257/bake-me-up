@@ -188,24 +188,29 @@ export default function AssistantPanel({
                   </div>
                 </>
               ))}
-            <div
-              className={`text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground ${
-                hideIntro ? "" : "mt-4"
-              }`}
-            >
-              Suggested
-            </div>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {chips.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => send(s)}
-                  className="rounded-full bg-primary/10 px-3 py-1.5 text-sm text-foreground transition hover:bg-primary/15"
+            {/* Coaching shows a persistent, per-step chip row below instead (updates each step). */}
+            {!currentStep && (
+              <>
+                <div
+                  className={`text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground ${
+                    hideIntro ? "" : "mt-4"
+                  }`}
                 >
-                  {s}
-                </button>
-              ))}
-            </div>
+                  Suggested
+                </div>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {chips.map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => send(s)}
+                      className="rounded-full bg-primary/10 px-3 py-1.5 text-sm text-foreground transition hover:bg-primary/15"
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         )}
 
@@ -234,16 +239,21 @@ export default function AssistantPanel({
         <div ref={endRef} />
       </div>
 
-      {currentStep && messages.length > 0 && (
-        <button
-          onClick={() => send("What's next?")}
-          disabled={loading}
-          className={`self-start rounded-full bg-primary/10 px-3 py-1 text-xs text-foreground transition hover:bg-primary/15 disabled:opacity-40 ${
-            flow ? "mt-3" : "mx-3 mb-1 mt-1"
-          }`}
-        >
-          What&apos;s next?
-        </button>
+      {/* Coaching: a persistent, per-step suggestion row. Updates as the step changes so the
+          chips always reflect the current step (not just the empty state). */}
+      {currentStep && (
+        <div className={`flex flex-wrap gap-1.5 ${flow ? "mt-3" : "mx-3 mb-1 mt-1"}`}>
+          {chips.map((s) => (
+            <button
+              key={s}
+              onClick={() => send(s)}
+              disabled={loading}
+              className="rounded-full bg-primary/10 px-3 py-1 text-xs text-foreground transition hover:bg-primary/15 disabled:opacity-40"
+            >
+              {s}
+            </button>
+          ))}
+        </div>
       )}
 
       <form

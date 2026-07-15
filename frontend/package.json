@@ -8,7 +8,8 @@
     "prebuild": "node scripts/sync-recipes.mjs",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "gen:questions": "node scripts/gen-step-questions.mjs"
   },
   "dependencies": {
     "@streamdown/cjk": "^1.0.3",

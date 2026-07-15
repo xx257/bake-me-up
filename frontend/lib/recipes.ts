@@ -7,6 +7,32 @@ import { formatMinutes } from "@/lib/format";
 // Populated at build time by scripts/sync-recipes.mjs (predev / prebuild).
 const RECIPES_DIR = join(process.cwd(), "content", "recipes");
 
+// Precomputed step coaching (Coach Mode), keyed by slug → per-step { title, note, questions }.
+type StepQuestions = Record<string, { title: string; note?: string; questions: string[] }[]>;
+const STEP_QUESTIONS: StepQuestions = (() => {
+  try {
+    const raw = readFileSync(join(process.cwd(), "content", "step-questions.json"), "utf8");
+    return JSON.parse(raw) as StepQuestions;
+  } catch {
+    return {};
+  }
+})();
+
+const normTitle = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+
+// Attach cached questions to steps, but only when the cache still lines up with the recipe
+// (title matches at the same index) — a stale or missing cache fails safe to no questions.
+function attachQuestions(slug: string, steps: Step[]): void {
+  const cached = STEP_QUESTIONS[slug];
+  for (const step of steps) {
+    const entry = cached?.[step.index - 1];
+    const matches = entry && normTitle(entry.title) === normTitle(step.title);
+    if (matches && entry.questions?.length) step.questions = entry.questions;
+    // Instructor tip wins; the generated note only fills the gap.
+    step.note = step.tip ?? (matches ? entry.note : undefined) ?? undefined;
+  }
+}
+
 export type Difficulty = { level?: string; skills?: string[] };
 
 export type RecipeMeta = {
@@ -39,6 +65,8 @@ export type Step = {
   temperature?: string;
   equipment?: string;
   tip?: string; // instructor tip auto-mapped to this step
+  note?: string; // Coach Mode guidance: instructor tip if present, else generated
+  questions?: string[]; // precomputed Coach Mode suggestions for this step
 };
 
 export type Recipe = RecipeMeta & {
@@ -351,6 +379,7 @@ function parse(slug: string): Recipe {
 
   const rawSteps = parseSteps(content);
   const { steps, general } = mapTips(parseTips(content), rawSteps);
+  attachQuestions(slug, steps);
   const troubleshooting = parseTroubleshooting(content);
   const oven = data.equipment?.oven;
   const conv = oven?.convection ?? oven?.conventional;
