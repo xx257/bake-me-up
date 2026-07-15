@@ -42,6 +42,7 @@ type ToolCall = {
     category: string;
     difficulty?: string;
     total_time_min?: number;
+    score?: number;
   }[];
   state: string;
 };
@@ -338,9 +339,19 @@ export default function Kitchen({ featured }: { featured?: Featured }) {
                               className="flex items-center justify-between gap-3"
                             >
                               <span>{c.title}</span>
-                              <span className="text-muted-foreground">
-                                {c.category}
-                                {c.total_time_min ? ` · ~${c.total_time_min}m` : ""}
+                              <span className="flex items-center gap-2.5 text-muted-foreground">
+                                <span>
+                                  {c.category}
+                                  {c.total_time_min ? ` · ~${c.total_time_min}m` : ""}
+                                </span>
+                                {typeof c.score === "number" && (
+                                  <span
+                                    className="font-mono text-xs text-muted-foreground/70"
+                                    title="cosine similarity"
+                                  >
+                                    {c.score.toFixed(2)}
+                                  </span>
+                                )}
                               </span>
                             </li>
                           ))}

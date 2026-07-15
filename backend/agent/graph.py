@@ -329,6 +329,7 @@ def plan_node(state: State) -> dict:
                 "category": c["category"]["label"],
                 "difficulty": c.get("difficulty"),
                 "total_time_min": c.get("total_time_min"),
+                "score": c.get("_score"),
             }
             for c in candidates
         ],
