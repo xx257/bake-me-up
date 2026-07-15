@@ -16,6 +16,7 @@ per-session thread, so this graph is compiled without a checkpointer. Clients ar
 
 from __future__ import annotations
 
+import re
 from typing import Annotated, Literal, TypedDict
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
@@ -23,7 +24,7 @@ from langgraph.graph import START, StateGraph
 from langgraph.graph.message import add_messages
 from pydantic import BaseModel, Field
 
-from .catalog import get_body, get_catalog
+from .catalog import get_body, get_catalog, get_entry
 from .config import get_chat_llm
 from .retrieval import retrieve_profiles
 
@@ -32,7 +33,8 @@ Mode = Literal["plan", "bake", "general"]
 
 class State(TypedDict):
     messages: Annotated[list, add_messages]
-    active_recipe: str | None
+    active_recipe: str | None  # recipe page: the user is actively baking this
+    current_recommendation: str | None  # Kitchen: the pinned pick the user is evaluating
     mode: Mode
     recommendations: list
     tool: dict | None  # visible "tool call" from the plan lane (for the UI)
@@ -48,8 +50,43 @@ def _last_user_text(messages: list) -> str:
     return ""
 
 
+def _recent_user_text(messages: list, n: int = 3) -> str:
+    """Join the last up-to-n user turns so planning constraints carry across a short exchange
+    ('something sweet under an hour' + 'cookies please'). Structured intent extraction
+    downstream ignores non-baking chatter, so stray turns don't pollute retrieval."""
+    texts: list[str] = []
+    for m in reversed(messages):
+        if isinstance(m, HumanMessage):
+            texts.append(m.content)
+        elif isinstance(m, dict) and m.get("role") == "user":
+            texts.append(m["content"])
+        if len(texts) >= n:
+            break
+    return "\n".join(reversed(texts))
+
+
 def _library_titles() -> str:
     return ", ".join(r["title"] for r in get_catalog())
+
+
+# Obvious "give me a different recipe" phrases → skip the LLM router, go straight to plan.
+# `instead` matches only when NOT "instead of" (which is a substitution question about the pick).
+_NEW_SEARCH_RE = re.compile(
+    r"(\banything else\b|\bsomething else\b|\bshow me (another|something else)\b|"
+    r"\banother (one|option|recipe|idea)\b|\ba different (one|recipe|option|idea)\b|"
+    r"\bother (options?|recipes?|ideas?)\b|\bwhat else\b|\bnot (that|this) one\b|"
+    r"\binstead\b(?!\s+of))",
+    re.IGNORECASE,
+)
+
+
+def _wants_new_search(text: str) -> bool:
+    return bool(_NEW_SEARCH_RE.search(text or ""))
+
+
+def _title_for(recipe_id: str | None) -> str | None:
+    entry = get_entry(recipe_id) if recipe_id else None
+    return entry["title"] if entry else None
 
 
 # ── Router ────────────────────────────────────────────────────────────────────
@@ -60,34 +97,56 @@ class _Route(BaseModel):
 
 
 def route_node(state: State) -> dict:
-    # Baking Mode: a recipe is selected, so always coach over that recipe (the full
-    # markdown is in context and can draw on general knowledge as needed). Clear any
-    # stale tool card from an earlier planning turn on this thread.
+    # Recipe page: a recipe is actively selected → always coach over it.
     if state.get("active_recipe"):
         return {"mode": "bake", "tool": None}
 
-    # No recipe selected (Kitchen): plan a bake, or answer generally if nothing matches.
+    text = _last_user_text(state["messages"])
+    rec = state.get("current_recommendation")
+
+    # Kitchen with a pinned recommendation: is this about that pick, or a new search?
+    if rec:
+        if _wants_new_search(text):
+            return {"mode": "plan", "tool": None}
+        title = _title_for(rec) or "the suggested recipe"
+        router = get_chat_llm(mini=True).with_structured_output(_Route)
+        system = SystemMessage(
+            content=(
+                f"The user is looking at a suggested recipe: {title}. Route their turn:\n"
+                f"- bake: a question or request ABOUT {title} (ingredients, substitutions, "
+                "timing, technique, difficulty, 'why this one', 'tell me more') — we answer "
+                "grounded in it.\n"
+                "- plan: they want a DIFFERENT recipe or another option (a new search).\n"
+                "- general: a general baking question unrelated to this recipe, or off-topic.\n"
+                "Return only the mode."
+            )
+        )
+        try:
+            mode = router.invoke([system, HumanMessage(content=text)]).mode
+        except Exception:
+            mode = "bake"
+        # A re-plan clears the stale tool card; a bake/general follow-up leaves it untouched
+        # so the UI keeps the pinned recommendation's retrieval card.
+        return {"mode": "plan", "tool": None} if mode == "plan" else {"mode": mode}
+
+    # Kitchen, no pick yet: plan a bake, or general (baking question / off-topic redirect).
     router = get_chat_llm(mini=True).with_structured_output(_Route)
     system = SystemMessage(
         content=(
             "Route a baking assistant's turn (no recipe is selected). Choose one:\n"
-            "- plan: the user wants to bake something, or to make/find a recipe — whether "
-            "by NAME ('how do I make roll cake', 'anpan', 'I want to bake shokupan') or by "
-            "CONSTRAINTS (time, taste, occasion, ingredients, skill; e.g. 'something quick "
-            "and sweet', 'dessert for friends'). Their library is searched afterward and we "
-            "either recommend a match or say it's not there — so you do NOT need to know "
-            "what's in the library.\n"
-            "- general: a general baking QUESTION that is not about making a specific item — "
-            "a technique, concept, comparison, or general troubleshooting. e.g. 'how do I "
-            "temper chocolate', 'what does folding mean', 'why do cookies spread', 'baking "
-            "soda vs powder'.\n"
+            "- plan: the user wants to bake something, or to make/find a recipe — by NAME "
+            "('how do I make roll cake', 'anpan') or by CONSTRAINTS (time, taste, occasion, "
+            "ingredients, skill). The library is searched afterward, so you do NOT need to "
+            "know what's in it.\n"
+            "- general: a general baking QUESTION (technique, concept, comparison, "
+            "troubleshooting — e.g. 'how do I temper chocolate'), OR anything NOT about "
+            "baking (weather, jokes, chit-chat). The general lane answers baking questions "
+            "and redirects off-topic ones.\n"
             "Return only the mode."
         )
     )
     try:
-        mode = router.invoke(
-            [system, HumanMessage(content=_last_user_text(state["messages"]))]
-        ).mode
+        mode = router.invoke([system, HumanMessage(content=text)]).mode
     except Exception:
         mode = "plan"
     if mode == "bake":
@@ -113,12 +172,19 @@ class _Intent(BaseModel):
 
 class _Rec(BaseModel):
     id: str = Field(description="a recipe id from the candidates")
-    why: str = Field(description="one sentence on why it fits the goal")
+    why: str = Field(
+        description="short editorial card copy — 1-2 crisp fragments, specific and memorable "
+        "(e.g. 'Crisp edges. Soft centers. Ready in 40 minutes.'). Grounded ONLY in this "
+        "candidate's data and the user's constraints — invent nothing. Not a full-sentence "
+        "explanation, and not a repeat of the message's reasoning."
+    )
 
 
 class _Plan(BaseModel):
     message: str = Field(
-        description="a warm, brief reply — introduce the picks, or if none fit, say so kindly"
+        description="a decisive, editorial reply in 1-3 sentences: the recommendation, a brief "
+        "reason, and one practical insight if useful. Plain and confident — no emojis, no filler "
+        "('Love that', 'Great question', 'Let me know if…')."
     )
     recommendations: list[_Rec] = Field(
         default_factory=list,
@@ -189,17 +255,21 @@ def _card(payload: dict, why: str) -> dict:
 
 def plan_node(state: State) -> dict:
     goal = _last_user_text(state["messages"])
-    # 1) understand: natural language → structured preferences
+    recent = _recent_user_text(state["messages"], n=3)
+    # 1) understand: recent planning turns → structured preferences (carry constraints across a
+    # short exchange; the query below is built from the STRUCTURED intent, so off-topic chatter
+    # can't leak into retrieval).
     intent = (
         get_chat_llm(mini=True)
         .with_structured_output(_Intent)
         .invoke(
             [
                 SystemMessage(
-                    content="Extract the user's baking preferences from their message. "
+                    content="Extract the user's baking preferences from their recent messages. "
+                    "Combine constraints stated across turns; ignore anything not about baking. "
                     "Leave a field null if not stated."
                 ),
-                HumanMessage(content=goal),
+                HumanMessage(content=recent),
             ]
         )
     )
@@ -225,9 +295,8 @@ def plan_node(state: State) -> dict:
 
     if not candidates:
         msg = (
-            "Hmm, I don't have a great match for that in your collection yet 🤔 — want me "
-            "to suggest something else, or you can add that recipe later and I'll totally "
-            "coach you through it! 🧑‍🍳"
+            "I don't have a good match for that in your collection yet. Tell me a bit more "
+            "about what you're after, or add the recipe later and I'll walk you through it."
         )
         return {"messages": [AIMessage(content=msg)], "recommendations": [], "tool": tool}
 
@@ -235,13 +304,28 @@ def plan_node(state: State) -> dict:
     planner = get_chat_llm().with_structured_output(_Plan)
     system = SystemMessage(
         content=(
-            "You are Bake Me Up — a warm, casual baking friend 🧑‍🍳. Recommend from ONLY "
-            "these candidate recipes for the user's goal. Recommend ONLY recipes that "
-            "genuinely fit (respect any time limit — total minutes shown); return 0-3, best "
-            "first, each with a short, friendly one-line why. Write the message like you're "
-            "texting a friend — warm and casual, with a light emoji or two (don't overdo "
-            "it). If none genuinely fit, return an empty list and a kind message that the "
-            "collection doesn't have a great match for that. Use only ids listed.\n\n"
+            "You are Bake Me Up — a calm, confident baking instructor. Recommend the right "
+            "recipe from ONLY these candidates for what the user wants.\n"
+            "- If they've given ANY concrete signal (taste, time, occasion, ingredient, "
+            "category, or a named bake), recommend now: return 1-3 that genuinely fit (respect "
+            "any time limit — total minutes shown), best first.\n"
+            "- Ask a clarifying question ONLY if the request is genuinely too vague to choose "
+            "well AND you have NOT already asked one earlier (check the history). Then return "
+            "an empty list with one short question as the message. Never ask twice.\n"
+            "- If none genuinely fit, return an empty list and say plainly that the collection "
+            "doesn't have a good match.\n"
+            "- When the user names a broad CATEGORY (bread, cake, cookies), prefer the most "
+            "representative example as a SOFT tiebreaker only — the user's explicit constraints "
+            "(time, difficulty, ingredients) always win over that default.\n"
+            "VOICE — the `message` is decisive and editorial, 1-3 sentences: the pick, a brief "
+            "reason, and one practical insight if useful (e.g. 'I'd start with the Anpan. It "
+            "uses the same Kashipan dough, but the process is more forgiving. The dough "
+            "development is the part worth paying attention to.'). No emojis. No filler ('Love "
+            "that', 'Great question', 'Let me know if…'). Sound like you know what you'd choose.\n"
+            "Each `why` is short editorial card copy — crisp fragments grounded ONLY in the "
+            "candidate's data below (taste, texture, good-for, summary, time, difficulty) and "
+            "the user's constraints; invent nothing, and don't repeat the message's reasoning. "
+            "Use only ids listed.\n\n"
             "Candidates:\n" + _candidates_block(candidates)
         )
     )
@@ -256,22 +340,42 @@ def plan_node(state: State) -> dict:
 
 # ── Baking Mode (full recipe in context) ─────────────────────────────────────
 
+# Actively baking (recipe page): coach through the recipe, step by step.
 COACH_PROMPT = (
-    "You are Bake Me Up — a warm, encouraging baking friend baking right alongside the "
-    "user through ONE recipe. Keep it casual and friendly, like texting a friend who loves "
-    "to bake, with a light sprinkle of emojis 🧑‍🍳 (a couple per reply, don't overdo it). "
-    "Use the full recipe below and the conversation so far (including any goals they "
-    "mentioned while planning). Answer grounded in this recipe and mention it by name; if "
-    "something truly isn't covered, just say so rather than making it up. Keep them moving "
-    "and confident! 🙌"
+    "You are Bake Me Up — a calm, confident baking instructor working alongside the user "
+    "through ONE recipe they are baking. Warm but not chatty; plain and editorial, no emojis. "
+    "Use the full recipe below and the conversation so far (including any goals from planning). "
+    "Answer grounded in this recipe; if something truly isn't covered, say so rather than "
+    "inventing it. Keep replies concise and decisive.\n"
+    "STEP STATE — the turn's context names the user's CURRENT step (and the next). Treat that as "
+    "shared state and ground every answer in the CURRENT step:\n"
+    "- Questions (why, substitutions, technique, 'what does medium peak mean') → answer only; do "
+    "NOT tell them to move on or imply they've advanced.\n"
+    "- If they ask what comes next, describe the upcoming step framed as 'After this step, "
+    "we'll…' and tell them to press 'I'm Ready' when the current step is done. Never phrase it as "
+    "if they've already advanced.\n"
+    "- You cannot change the step — the user advances it with the 'I'm Ready' button. Only ever "
+    "speak as if they're on the current step, so the chat and the page never drift apart."
+)
+
+# Evaluating a suggested recipe (Kitchen follow-up): help them decide — they haven't started.
+EVALUATE_PROMPT = (
+    "You are Bake Me Up — a calm, confident baking instructor. The user is CONSIDERING this "
+    "suggested recipe; they have NOT started baking it. Help them decide: answer their question "
+    "grounded in the full recipe below — difficulty, time, substitutions, what to expect, why it "
+    "fits. Warm but not chatty; plain and editorial, no emojis. Do not assume they've begun. Keep "
+    "it concise (2-4 sentences) and decisive; if something isn't covered, say so."
 )
 
 
 def bake_node(state: State) -> dict:
-    body = get_body(state.get("active_recipe") or "")
+    active = state.get("active_recipe")
+    recipe_id = active or state.get("current_recommendation")
+    body = get_body(recipe_id or "")
     if not body:
         return general_node(state)
-    system = SystemMessage(content=f"{COACH_PROMPT}\n\n--- RECIPE ---\n{body}")
+    prompt = COACH_PROMPT if active else EVALUATE_PROMPT
+    system = SystemMessage(content=f"{prompt}\n\n--- RECIPE ---\n{body}")
     reply = get_chat_llm().invoke([system, *state["messages"]])
     return {"messages": [reply]}
 
@@ -282,11 +386,15 @@ def bake_node(state: State) -> dict:
 def general_node(state: State) -> dict:
     system = SystemMessage(
         content=(
-            "You are Bake Me Up — a friendly baking buddy 🍞. The user's question isn't "
-            "about a recipe in their library, so answer from general baking knowledge in a "
-            "warm, casual tone with a light touch of emojis (a couple, don't overdo it). "
-            "Gently mention you don't have that one in their collection yet and they can add "
-            f"it later for tailored coaching. Their library has: {_library_titles()}."
+            "You are Bake Me Up — a calm, confident baking instructor, not a general "
+            "assistant. Plain and editorial, no emojis.\n"
+            "- If the user asked a genuine BAKING question (technique, concept, ingredient, "
+            "troubleshooting), answer briefly and plainly, then offer to help them pick "
+            "something to make.\n"
+            "- If the message is NOT about baking (weather, jokes, chit-chat, trivia), do NOT "
+            "answer it. Briefly redirect: you help people decide what to bake and walk them "
+            "through it — ask what they're in the mood for.\n"
+            f"Their collection has: {_library_titles()}."
         )
     )
     reply = get_chat_llm().invoke([system, *state["messages"]])

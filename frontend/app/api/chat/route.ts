@@ -40,12 +40,14 @@ export async function POST(request: Request) {
     );
   }
 
-  const { message, threadId, activeRecipe, currentStep } = (await request.json()) as {
-    message: string;
-    threadId?: string;
-    activeRecipe?: string;
-    currentStep?: string;
-  };
+  const { message, threadId, activeRecipe, currentStep, currentRecommendation } =
+    (await request.json()) as {
+      message: string;
+      threadId?: string;
+      activeRecipe?: string;
+      currentStep?: string;
+      currentRecommendation?: string;
+    };
 
   try {
     const tid = await ensureThread(threadId);
@@ -61,6 +63,8 @@ export async function POST(request: Request) {
         input: {
           messages: [{ role: "user", content }],
           active_recipe: activeRecipe ?? null,
+          // Always send it (null when absent) so the backend mirrors the pinned pick each turn.
+          current_recommendation: currentRecommendation ?? null,
         },
       }),
     });

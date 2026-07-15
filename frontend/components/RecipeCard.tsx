@@ -54,9 +54,7 @@ export default function RecipeCard({
           )}
         </div>
         <h3
-          className={`font-display mt-1 leading-snug transition group-hover:text-primary ${
-            compact ? "text-base" : "text-lg"
-          }`}
+          className={`font-display mt-1 leading-snug ${compact ? "text-base" : "text-lg"}`}
         >
           {title}
         </h3>

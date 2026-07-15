@@ -16,8 +16,24 @@ export default function IngredientGroups({ groups }: { groups: IngredientGroup[]
       return n;
     });
 
+  const total = groups.reduce((n, g) => n + g.items.length, 0);
+  const done = checked.size;
+
   return (
     <div className="space-y-5">
+      {total > 0 && (
+        <div>
+          <div className="text-xs font-medium text-muted-foreground">
+            {done} / {total} prepared
+          </div>
+          <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-secondary">
+            <div
+              className="h-full rounded-full bg-primary transition-[width] duration-300"
+              style={{ width: `${total ? (done / total) * 100 : 0}%` }}
+            />
+          </div>
+        </div>
+      )}
       {groups.map((g, gi) => (
         <div key={gi}>
           {g.name && (

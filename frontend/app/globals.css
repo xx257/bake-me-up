@@ -8,24 +8,26 @@
 
 /* Premium lifestyle palette: cream + espresso + oat neutrals, dusty rose interaction. */
 :root {
-  --background: #f6f1e8; /* cream */
-  --foreground: #3d322b; /* espresso */
-  --card: #fdfbf5; /* soft cream surface */
-  --card-foreground: #3d322b;
-  --popover: #fdfbf5;
-  --popover-foreground: #3d322b;
-  --primary: #b3777d; /* dusty rose (interaction) */
-  --primary-foreground: #fbf7f0;
-  --secondary: #eae0cf; /* oat */
-  --secondary-foreground: #4d4038;
-  --muted: #eae0cf; /* oat */
-  --muted-foreground: #8c7c6b; /* warm taupe */
-  --accent: #eae0cf;
-  --accent-foreground: #3d322b;
+  --background: #faf9f7; /* bright neutral paper */
+  --foreground: #1f1d1b; /* primary text — near-black, confident */
+  --body: #5a544e; /* long-form body text */
+  --card: #ffffff; /* clean white surface */
+  --card-foreground: #1f1d1b;
+  --popover: #ffffff;
+  --popover-foreground: #1f1d1b;
+  --primary: #626d47; /* olive — signature accent; saturated enough to read as a deliberate color */
+  --primary-foreground: #fdfcfb;
+  --primary-hover: #4e5836; /* darker olive for hover/active */
+  --secondary: #ede8e1; /* light neutral (cooler, less beige) */
+  --secondary-foreground: #1f1d1b;
+  --muted: #ede8e1;
+  --muted-foreground: #8a817b; /* metadata only */
+  --accent: #ede8e1;
+  --accent-foreground: #1f1d1b;
   --destructive: #b5544a;
-  --border: #e6dccb;
-  --input: #e6dccb;
-  --ring: #b3777d;
+  --border: #ece7e1; /* light, cool */
+  --input: #ece7e1;
+  --ring: #626d47;
   --radius: 0.85rem;
   /* Cream is the signature look — keep it even on dark-mode OSes. */
   color-scheme: light;
@@ -56,12 +58,14 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-body: var(--body);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
@@ -72,7 +76,7 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, monospace;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -80,9 +84,14 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-/* Editorial display serif for headings (resolves the Next.js font var at runtime). */
+/* Editorial display serif for recipe titles (resolves the Next.js font var at runtime). */
 .font-display {
   font-family: var(--font-newsreader), Georgia, "Times New Roman", serif;
+}
+
+/* Modern grotesque for planner/brand headlines (Kitchen hero + nav wordmark). */
+.font-headline {
+  font-family: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
 }
 
 @layer base {
@@ -90,7 +99,7 @@
     @apply border-border outline-ring/40;
   }
   body {
-    font-family: var(--font-geist-sans), "Geist", ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
     @apply bg-background text-foreground;
   }
 }

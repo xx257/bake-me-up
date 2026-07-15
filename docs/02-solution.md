@@ -14,12 +14,15 @@ The experience begins with the user's goal, not the recipe grid.
 **Core path (shipping):**
 1. **Kitchen** — describe a goal (time, ingredients, occasion, skill level).
 2. **AI planning** — extract intent → retrieve matching recipe **profiles** → rank &
-   explain the best picks, each with a short "why".
+   explain the best picks, each with a short "why". The Kitchen keeps a **single pinned
+   recommendation**: follow-ups about that pick route to the coach (so the retrieval card
+   doesn't re-fire), while "show me another / something different" starts a fresh search.
 3. **Choose a recipe** → **Recipe Page** (Knowledge, *Coach Available*): a recipe-first
    reference to understand and prepare; the coach is secondary and on-demand.
 4. **Start Baking** → **Baking Together** (Experience, *Coach Active*): a full-screen calm
-   instructor — context greeting → current step → *Ready when* / tip → **I'm Ready**, with a
-   persistent "Ask me anything" coach. Optimized for **confidence, not completion**.
+   instructor — **recipe title + step progress bar** → current step → *Ready when* / tip →
+   **I'm Ready** (attached to the checkpoint), with a **Kiwi** coaching note and suggested
+   questions alongside. Optimized for **confidence, not completion**.
 5. **AI coach** — loads the **full recipe into context**, aware of the current step, and
    **remembers the planning goal** across the session (thread memory);
    **general-knowledge fallback** when nothing in the library matches.
@@ -76,7 +79,7 @@ flowchart LR
 |--------------------|---------------------------------|----------------------------------------------------------------------------|
 | User interface     | Next.js on Vercel               | Journey app (Kitchen → Recipe Page → Baking Together) on phone + laptop     |
 | Agent framework    | LangGraph (Python)              | Explicit graph gives controllable routing across lanes + built-in memory    |
-| Router             | LLM classifier (gpt-4o-mini)    | Recipe active → bake; else plan or general                                  |
+| Router             | LLM classifier (gpt-4o-mini)    | Recipe active → bake; pinned pick → bake/plan/general; else plan or general |
 | Recipe catalog     | Committed `catalog.json`        | Ships profile fields (for planning) + full recipe bodies (for the coach) with the deploy |
 | LLM                | OpenAI gpt-4o / gpt-4o-mini     | 4o coaches/ranks; mini does routing + intent extraction                     |
 | **LLM gateway**    | **Vercel AI Gateway**           | Required by Task 2; the chat LLM's `base_url` in the Python backend          |
@@ -93,8 +96,12 @@ flowchart LR
 
 ```mermaid
 flowchart TD
-    U[User turn<br/>+ thread state · active_recipe] --> R{Router}
+    U[User turn<br/>+ thread state · active_recipe · pinned rec] --> R{Router}
     R -->|recipe active → bake| BK[Coach: full recipe<br/>in context]
+    R -->|pinned rec → sub-route| PR{About the pick?}
+    PR -->|question about it| BK
+    PR -->|wants another| P1
+    PR -->|off-topic| GEN
     R -->|no recipe · goal → plan| P1[Extract intent<br/>structured prefs]
     R -->|no recipe · off-topic → general| GEN[General knowledge<br/>+ 'not in your library']
     P1 --> P2[Retrieve recipe<br/>profiles · Qdrant]
@@ -108,9 +115,12 @@ flowchart TD
 
 **Two phases, two architectures.** A turn arrives on a **per-session thread** (created in
 the Kitchen, carried into the recipe page), so the backend already holds the conversation
-— including the user's planning goal. The **router** (gpt-4o-mini) is context-gated: if a
-recipe is active it goes straight to **bake**; with no recipe it picks **plan** or
-**general**.
+— including the user's planning goal. The **router** (gpt-4o-mini) is context-gated across
+three cases: (a) if a recipe is **active** (Recipe Page) it goes straight to **bake**; (b) if
+the Kitchen has a **pinned recommendation**, a sub-router classifies the turn as **bake** (a
+question about that pick), **plan** (a new search — also caught deterministically for phrases
+like "show me another / something different"), or **general** (off-topic); (c) with no recipe
+and no pick it picks **plan** or **general**.
 
 - **Planning Mode (plan)** runs a three-step pipeline — retrieval only where it adds
   value: (1) an LLM extracts the goal into **structured preferences** (taste, texture,
@@ -121,7 +131,10 @@ recipe is active it goes straight to **bake**; with no recipe it picks **plan** 
   context and reasons over the whole workflow — no per-question retrieval (one recipe fits
   the window, and coaching benefits from seeing every step). It stays grounded in that
   recipe, weaving in general knowledge only for genuine gaps; Baking Together passes the
-  current + next step so "what's next?" resolves exactly.
+  current + next step so "what's next?" resolves exactly. The same lane serves **two
+  personas**: coaching an **in-progress bake** (an active recipe, step-aware) vs. **evaluating
+  a pinned suggestion** in the Kitchen (the user hasn't started yet) — both load the full
+  recipe; only the framing differs.
 - **General** answers from general baking knowledge and notes the recipe isn't in the
   user's library yet.
 

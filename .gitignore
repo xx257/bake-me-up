@@ -34,3 +34,4 @@ references/
 
 # LangGraph dev server local artifacts
 .langgraph_api/
+.vercel

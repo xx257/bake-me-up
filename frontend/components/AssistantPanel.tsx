@@ -11,6 +11,7 @@ import {
   MessageResponse,
 } from "@/components/ai-elements/message";
 import ReasoningStages from "@/components/ReasoningStages";
+import KiwiMark from "@/components/KiwiMark";
 
 type Msg = { role: "user" | "assistant"; content: string };
 type CurrentStep = {
@@ -39,6 +40,7 @@ export default function AssistantPanel({
   fill = false,
   bare = false,
   flow = false,
+  hideIntro = false,
 }: {
   recipeId: string;
   recipeTitle: string;
@@ -51,6 +53,7 @@ export default function AssistantPanel({
   fill?: boolean;
   bare?: boolean;
   flow?: boolean;
+  hideIntro?: boolean;
 }) {
   const { threadId, setThreadId } = useSession();
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -98,12 +101,12 @@ export default function AssistantPanel({
           threadId,
           activeRecipe: recipeId,
           currentStep: currentStep
-            ? `Step ${currentStep.index}/${currentStep.total}: ${currentStep.title}` +
+            ? `You are currently on Step ${currentStep.index} of ${currentStep.total}: ${currentStep.title}` +
               (currentStep.next
-                ? `; the next step is "${currentStep.next}"`
-                : "; this is the final step") +
+                ? `. The next step is "${currentStep.next}" (they have NOT advanced yet)`
+                : ". This is the final step") +
               (currentStep.completed !== undefined
-                ? `; ${currentStep.completed} of ${currentStep.total} steps done so far`
+                ? `. ${currentStep.completed} of ${currentStep.total} steps done so far`
                 : "")
             : undefined,
         }),
@@ -144,7 +147,7 @@ export default function AssistantPanel({
       {!bare && !flow && (
         <div className="border-b border-border/50 px-4 py-3">
           <div className="flex items-center gap-2">
-            <span aria-hidden>🍞</span>
+            <KiwiMark size={22} />
             <div className="text-sm font-medium">Bake Me Up</div>
           </div>
           <div className="mt-0.5 truncate text-xs text-muted-foreground">{status}</div>
@@ -153,69 +156,76 @@ export default function AssistantPanel({
 
       <div
         ref={scrollRef}
-        className={flow ? "space-y-3" : "flex-1 space-y-3 overflow-y-auto px-4 py-4"}
+        className={
+          flow ? "space-y-3 text-body" : "flex-1 space-y-3 overflow-y-auto px-4 py-4 text-body"
+        }
       >
-        {messages.length === 0 &&
-          (flow ? (
-            <div className="text-sm">
-              <p className="text-foreground/80">I&apos;m right here.</p>
-              <div className="mt-4 text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground/70">
-                Suggested
-              </div>
-              <div className="mt-2 flex flex-col items-start gap-1.5">
-                {chips.map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => send(s)}
-                    className="text-left text-sm text-primary/90 transition hover:text-primary"
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
+        {messages.length === 0 && (
+          <div className="text-sm">
+            {!hideIntro &&
+              (flow ? (
+                <p className="text-body">I&apos;m right here.</p>
+              ) : (
+                <>
+                  <p className="text-body">
+                    Ask me anything about{" "}
+                    <span className="font-medium text-foreground">{recipeTitle}</span>.
+                  </p>
+                  <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+                    {difficulty && <span className="capitalize">{difficulty}</span>}
+                    {stepCount > 0 && (
+                      <>
+                        <span aria-hidden>·</span>
+                        <span>{stepCount} steps</span>
+                      </>
+                    )}
+                    {estTimeMin && (
+                      <>
+                        <span aria-hidden>·</span>
+                        <span>~{formatMinutes(estTimeMin)}</span>
+                      </>
+                    )}
+                  </div>
+                </>
+              ))}
+            <div
+              className={`text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground ${
+                hideIntro ? "" : "mt-4"
+              }`}
+            >
+              Suggested
             </div>
-          ) : (
-            <div className="text-sm text-muted-foreground">
-              <p>
-                Ask me anything about{" "}
-                <span className="font-medium text-foreground">{recipeTitle}</span>.
-              </p>
-              <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
-                {difficulty && <span className="capitalize">{difficulty}</span>}
-                {stepCount > 0 && (
-                  <>
-                    <span aria-hidden>·</span>
-                    <span>{stepCount} steps</span>
-                  </>
-                )}
-                {estTimeMin && (
-                  <>
-                    <span aria-hidden>·</span>
-                    <span>~{formatMinutes(estTimeMin)}</span>
-                  </>
-                )}
-              </div>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {chips.map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => send(s)}
-                    className="rounded-full bg-secondary/60 px-3 py-1 text-xs text-muted-foreground transition hover:bg-secondary hover:text-foreground"
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {chips.map((s) => (
+                <button
+                  key={s}
+                  onClick={() => send(s)}
+                  className="rounded-full bg-primary/10 px-3 py-1.5 text-sm text-foreground transition hover:bg-primary/15"
+                >
+                  {s}
+                </button>
+              ))}
             </div>
-          ))}
+          </div>
+        )}
 
-        {messages.map((m, i) => (
-          <Message key={i} from={m.role}>
-            <MessageContent>
+        {messages.map((m, i) =>
+          m.role === "user" ? (
+            <Message key={i} from="user">
+              <MessageContent>
+                <MessageResponse>{m.content}</MessageResponse>
+              </MessageContent>
+            </Message>
+          ) : (
+            // The companion's note — a soft recipe-note card, not a chat bubble.
+            <div
+              key={i}
+              className="rounded-2xl border border-[#e8e0d6] bg-card p-4 text-body"
+            >
               <MessageResponse>{m.content}</MessageResponse>
-            </MessageContent>
-          </Message>
-        ))}
+            </div>
+          ),
+        )}
 
         {loading && (
           <ReasoningStages stages={["Reading the recipe", "Thinking it through"]} />
@@ -228,7 +238,7 @@ export default function AssistantPanel({
         <button
           onClick={() => send("What's next?")}
           disabled={loading}
-          className={`self-start rounded-full bg-secondary/60 px-3 py-1 text-xs text-muted-foreground transition hover:bg-secondary hover:text-foreground disabled:opacity-40 ${
+          className={`self-start rounded-full bg-primary/10 px-3 py-1 text-xs text-foreground transition hover:bg-primary/15 disabled:opacity-40 ${
             flow ? "mt-3" : "mx-3 mb-1 mt-1"
           }`}
         >
@@ -251,7 +261,7 @@ export default function AssistantPanel({
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder={flow ? "Message…" : "Ask about this recipe…"}
-          className="flex-1 rounded-full bg-secondary/60 px-4 py-2.5 text-sm outline-none transition focus:bg-secondary"
+          className="flex-1 rounded-full border border-border bg-card px-4 py-2.5 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:border-primary/60"
         />
         <button
           type="submit"
