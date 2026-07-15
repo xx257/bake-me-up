@@ -55,6 +55,57 @@ def retrieve_profiles(query: str, k: int = 4, score_floor: float = 0.0) -> list[
     ]
 
 
+@traceable(run_type="retriever", name="retrieve_recipes")
+def retrieve_recipes(
+    query: str,
+    *,
+    collection: str,
+    k: int = 3,
+    scope_recipe_id: str | None = None,
+) -> dict:
+    """Shared chunk retriever (parent-child style) for coaching + discovery.
+
+    Dense child search over `collection` (optionally scoped to one recipe), mapped UP to
+    recipes: returns deduped recipe ids (best-first), the matched evidence chunks, and the
+    top cosine score (a seam for the later Tavily gate). The caller loads the FULL recipe
+    for grounding — the children only decide relevance."""
+    from qdrant_client.models import FieldCondition, Filter, MatchValue
+
+    from .config import get_embeddings, get_qdrant_client
+
+    vector = get_embeddings().embed_query(query)
+    qfilter = None
+    if scope_recipe_id:
+        qfilter = Filter(
+            must=[FieldCondition(key="metadata.recipe_id", match=MatchValue(value=scope_recipe_id))]
+        )
+    hits = get_qdrant_client().query_points(
+        collection_name=collection, query=vector, limit=k, query_filter=qfilter, with_payload=True
+    ).points
+
+    recipe_ids: list[str] = []
+    evidence: list[dict] = []
+    for h in hits:
+        pl = h.payload or {}
+        md = pl.get("metadata", {}) or {}
+        rid = md.get("recipe_id")
+        if rid and rid not in recipe_ids:
+            recipe_ids.append(rid)
+        evidence.append(
+            {
+                "recipe_id": rid,
+                "section": md.get("section"),
+                "text": pl.get("page_content") or pl.get("text") or "",
+                "score": round(h.score, 4),
+            }
+        )
+    return {
+        "recipe_ids": recipe_ids,
+        "evidence": evidence,
+        "top_score": round(hits[0].score, 4) if hits else 0.0,
+    }
+
+
 def format_context(docs: list[Document]) -> str:
     """Render retrieved chunks into a grounding block with recipe attribution."""
     blocks = []

@@ -1,112 +1,100 @@
-# Task 3 — Dealing with the Data (design decided Day 1, built Day 2)
+# Task 3 — Dealing with the Data
 
 ## Data sources
 
-The corpus stays deliberately small and *personal-first* so the app reads as a
-companion for recreating a specific person's recipes — not a generic recipe search
-engine.
+The corpus is deliberately small and *personal-first*: Bake Me Up reads as a companion for
+recreating a specific collection's recipes, not a generic recipe search engine. Each recipe
+is a **structured knowledge asset**, not just instructions.
 
-- **Personal / instructor-style recipes (your own data / RAG):** **5–8** recipes,
-  manually cleaned (handwritten/PDF/instructor handouts). This is the heart of the
-  corpus. *TODO Day 2: add files to `data/recipes/`.*
-- **Public recipes (optional):** **only 2–3**, and only to introduce *retrieval
-  ambiguity* (near-duplicate terminology across documents) — not to pad coverage.
-- **External API (Agent):** **Tavily Search** for questions the corpus can't answer
-  (substitutions, techniques, general baking knowledge).
+- **Recipe Knowledge Base (your own data / RAG):** **6 recipes today**, manually cleaned
+  from handwritten / PDF / instructor-handout sources in `data/recipes/`. Beyond ingredients
+  and steps, each carries the *surrounding knowledge* — **instructor tips**, **troubleshooting
+  Q&A**, per-step notes, and a **workflow** (step graph). This knowledge is the point of the
+  product.
+- **External knowledge (Agent):** **Tavily Search**, for baking knowledge outside the corpus
+  (open-world substitutions, general technique) — a **discovery tool** for standalone baking
+  questions and a **coach fallback** for a known recipe. Knowledge-only; never used to fetch
+  recipes.
+- **Workflow state (deterministic):** the per-step `next_step` chain + completion criteria,
+  parsed into a step graph — drives "what's next?" without retrieval.
 
-We don't need a large corpus — just enough *similar* recipes to make retrieval
-evaluation meaningful. Candidate set (overlapping terminology on purpose):
+The corpus overlaps on purpose (milk bread, roll cake, anpan, cheesecake, cookies, mochi
+share terms like *meringue*, *yudane*, *water bath*, *cream cheese*) so discovery retrieval
+has a realistic job: pick the *right* recipe among *similar* ones.
 
-- Japanese milk bread
-- matcha milk bread
-- red bean buns
-- brioche
-- tangzhong dinner rolls
-- butter cookies
-- matcha cookies
+## How the data is used per mode
 
-Shared terms (tangzhong, milk bread, matcha, enriched dough) across documents create a
-realistic retrieval test where the retriever must pick the *right* similar recipe.
+Recipes are compiled by `backend/agent/build_catalog.py` into a committed `catalog.json`
+(so the data ships with the deploy — the backend never reads `data/recipes/` at runtime),
+and embedded into Qdrant by `backend/agent/ingest.py`.
 
-## Data for the two modes (v2)
-
-Two derived artifacts, both generated from the recipe files by
-`backend/agent/build_catalog.py` into a committed `catalog.json` (so they ship with the
-deploy — the backend never reads `data/recipes` at runtime):
-
-- **Recommendation profiles (Planning Mode).** A lightweight semantic profile per recipe
-  — title, summary, difficulty, total/active time, taste, texture, occasion, pairs-with,
-  key ingredients, skills, tags — embedded into a Qdrant **profiles** collection
-  (`python -m agent.ingest profiles`). Planning retrieves over these to match a goal to
-  recipes, then an LLM ranks + explains the top candidates.
-- **Full recipe bodies (Baking Mode).** The complete normalized markdown (prose; workflow
-  blocks stripped) is loaded straight into the coach's context — no per-question
-  retrieval. One recipe fits the window, and coaching benefits from seeing every step.
-
-The structure-aware **recipe-chunk** embeddings described below are **retained for
-evaluation and future recipe-level retrieval**, but are not on the live coaching path in
-v2.
+- **Discovery (recipe unknown) → one tool per turn.** The discover node binds two tools and the
+  model calls **exactly one**. `search_collection` does **dense retrieval over recipe profiles**
+  in Qdrant (compact per-recipe embeddings: taste, texture, occasion, time, summary), ranks them,
+  and recommends ("which recipe uses yudane?", "something fluffy"). For a **standalone
+  baking-knowledge** question the collection doesn't cover ("why does yudane make bread softer?"),
+  the model calls `search_baking_web` (Tavily) instead. Retrieval is used **only** here — where
+  the target is unknown.
+- **Coaching (recipe known) → full recipe in context.** The complete normalized recipe
+  markdown is loaded straight into the coach's context — **no per-question retrieval**. One
+  recipe fits the window, and coaching benefits from seeing every step, tip, and
+  troubleshooting note together (Tavily remains a fallback for what the recipe can't answer).
 
 ## How they interact during usage
 
-The agent first attempts to answer from the **local recipe corpus** via RAG. When the
-question falls outside the corpus (e.g. "can I swap bread flour for AP flour?"), the
-agent calls **Tavily** and grounds the answer in web results, adding a recipe-specific
-caveat where relevant. Retrieval and web search are complementary: RAG owns the
-"what does *this* recipe say / mean" questions; Tavily owns the open-world "general
-baking knowledge" questions.
+The agent prefers the **local Recipe Knowledge Base**. In discovery (no recipe active) the
+model picks one tool: `search_collection` for finding/recommending a recipe, or `search_baking_web`
+when the turn is a standalone baking question the corpus can't answer (e.g. "can I swap bread
+flour for AP flour?"), grounding the reply in web results. In coaching (recipe active) it answers
+from the full recipe and falls back to Tavily only for what the recipe doesn't cover. So the
+collection owns "which recipe / what does *this* recipe say"; Tavily owns open-world "general
+baking knowledge" (never recipe-finding). Workflow control ("what's next?") is deterministic and
+uses neither.
 
-## Default chunking strategy
+## Chunking strategy
 
-**Structure-aware chunking.** Each recipe is split by section — title/metadata,
-ingredients, steps, and notes — rather than by fixed size, and every chunk carries the
-recipe title and yield as metadata. Long free-text note blobs fall back to ~500-token
-recursive character splitting with overlap.
+> **Scope.** Live discovery ranks over **recipe profiles** (above). The 150-token chunk
+> retriever described here is the **Task-6 retrieval-experiment baseline** — built in
+> `agent/ingest.py` + `retrieve_recipes`, embedded to Qdrant, but **not wired into the live
+> discovery path**. It's the groundwork for chunk-level *recipe-content* retrieval (answering
+> knowledge from recipe bodies) and the controlled experiment in `evaluation.md`.
 
-**Why:** recipes are semi-structured; keeping ingredient lists and step sequences
-intact means retrieval returns coherent, actionable context (a whole step or the full
-ingredient list) instead of a fragment cut mid-instruction, and the attached metadata
-lets the retriever filter to the active recipe.
+**Fixed-size dense chunking (150 tokens, no overlap).** The cleaned recipe prose is split
+into **150-token** chunks (`cl100k_base`, the tokenizer `text-embedding-3-small` uses),
+each tagged with its `recipe_id` (a keyword payload index) so retrieved chunks map back to
+the recipe. This is the conventional dense baseline for the retrieval experiment.
 
-**Hybrid recipe format — what gets embedded vs parsed.** Recipes use a hybrid file
-format (YAML frontmatter for tools/routing + a prose body for RAG; see
-[`../data/recipes/TEMPLATE.md`](../data/recipes/TEMPLATE.md) and the worked example
-[`../data/recipes/japanese-milk-bread.md`](../data/recipes/japanese-milk-bread.md)).
-The ingestion pipeline splits the two halves cleanly:
+**Why 150 — measured, not guessed.** We profiled the cleaned content before fixing the
+size:
 
-- **Frontmatter** (`scale`, `yield`, `equipment`, `entry_step`, …) is parsed for the
-  deterministic tools (`scale()`, `timeline()`) and routing — **not embedded**.
+| Unit | min | median | mean | p75 | p90 | max |
+|------|-----|--------|------|-----|-----|-----|
+| Natural content units (step / tip / troubleshooting Q&A), tokens | 15 | **50** | 51 | 62 | 82 | **138** |
+
+Full cleaned recipes run **~700–1060 tokens** each. Two consequences:
+
+1. **150 is a sound chunk size** — it comfortably exceeds the largest single content unit
+   (138), so a chunk never fragments below one semantic unit; it merges ~3 small units,
+   which is exactly the naive fixed-size behavior a baseline should have.
+2. **Coaching needs no retrieval** — a whole recipe (~800 tokens) fits the model window, so
+   the coach loads the full recipe rather than retrieving pieces of it.
+
+**What's embedded vs. parsed (hybrid file format).** Recipes use a hybrid format — YAML
+frontmatter for structure/tools + a prose body for RAG (see
+[`../data/recipes/TEMPLATE.md`](../data/recipes/TEMPLATE.md)):
+
 - **Prose body is embedded:** `## Ingredients`, each step's `#### Recipe`, `## Instructor
-  Tips`, `## Troubleshooting`, and `## Recipe Summary`.
-- **Per-step `#### Workflow` YAML blocks are stripped out of the embedded text** and
-  parsed into the step graph (`id` → `next_step` chain + `completion` criteria) that the
-  no-RAG workflow engine walks for "what's next?". Embedding those blocks would pollute
-  retrieval with low-value YAML — the same reason the earlier pure-YAML recipe drafts
-  were poor RAG fodder.
-- `TEMPLATE.md` and `README.md` are skipped entirely.
+  Tips`, `## Troubleshooting`, `## Recipe Summary` — the knowledge worth retrieving.
+- **Frontmatter is parsed, not embedded** (`scale`, `yield`, `equipment`, profile fields) —
+  it feeds the catalog and future deterministic tools.
+- **Per-step `#### Workflow` YAML is stripped from the embedded text** and parsed into the
+  step graph (`id` → `next_step` + `completion`) that drives deterministic "what's next?" —
+  embedding raw YAML would only pollute retrieval.
+- `TEMPLATE.md` and `README.md` are skipped.
 
-"Hero" recipes carry the per-step `#### Workflow` blocks (guided workflow + `timeline()`);
-"lite" recipes omit them and contribute prose + `scale` only. Either way, only the prose
-is embedded, so the retrieval baseline is unaffected by the tier.
+## Retrieval experiment (Task 6)
 
-**Chunking is held constant across the Task 6 experiment.** Structure-aware chunks are
-a deliberate production choice, so we do *not* vary chunking between baseline and
-improved runs — that would change two things at once. Instead we hold the chunks fixed
-and vary only the *retrieval* method (see [`evaluation.md`](evaluation.md)): dense-only
-→ hybrid + reranker → one further single-variable change. One variable at a time keeps
-the comparison clean.
-
-## Hybrid retrieval — implementation choice (verify Monday AM)
-
-The advanced retriever needs sparse (BM25-style) retrieval alongside dense. This is an
-implementation-risk item — the code doesn't exist yet — so it is a short Monday-morning
-spike, not a locked assumption. Chosen approach and fallback:
-
-- **Primary:** Qdrant **native dense + sparse named vectors**, fused server-side with
-  **RRF via the Query API** (sparse vectors produced by FastEmbed). Single store, one
-  query.
-- **Fallback (if native sparse misbehaves):** a separate BM25 retriever + Qdrant dense,
-  fused client-side with RRF (e.g. LangChain `EnsembleRetriever`).
-
-Resolve which one before writing retrieval code so hybrid is one concrete, verified
-implementation rather than a diagram promise.
+The baseline (fixed-150 dense) is one point in a **controlled retrieval experiment** —
+baseline vs. one advanced variant, holding everything else constant and varying a single
+factor at a time. That experiment and its metrics live in
+[`evaluation.md`](evaluation.md).

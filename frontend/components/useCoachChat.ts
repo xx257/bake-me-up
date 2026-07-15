@@ -4,7 +4,14 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useSession } from "@/components/SessionProvider";
 
-export type CoachMsg = { role: "user" | "assistant"; content: string };
+import type { WebSearchCall } from "@/components/WebSearchCard";
+
+export type CoachMsg = {
+  role: "user" | "assistant";
+  content: string;
+  // Web-search cards for this assistant turn (Tavily fallback), when the recipe couldn't answer.
+  webSearch?: WebSearchCall[] | null;
+};
 
 export type CoachStep = {
   index: number;
@@ -13,26 +20,36 @@ export type CoachStep = {
   next?: string;
 };
 
-// The coach chat that powers Baking Together: one grounded conversation per session,
-// aware of the current step so "what's next?" resolves to the right step. Shared between
-// the suggested-question chips and the conversation section of the single-column flow.
+// The coach chat that powers Baking Together. The conversation is displayed PER STEP —
+// each step has its own bucket, so advancing ("I'm Ready") shows a fresh conversation and
+// returning to a step restores its Q&A. Memory is NOT per-step: every turn rides one shared
+// LangGraph thread (via `threadId`), so the coach keeps FULL session history regardless of
+// which step's bucket is on screen.
 export function useCoachChat(recipeId: string, step: CoachStep) {
   const { threadId, setThreadId } = useSession();
-  const [messages, setMessages] = useState<CoachMsg[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [byStep, setByStep] = useState<Record<number, CoachMsg[]>>({});
+  const [loadingStep, setLoadingStep] = useState<number | null>(null);
+
+  // Only the current step's messages are visible; the spinner shows only on the step that asked.
+  const messages = byStep[step.index] ?? [];
+  const loading = loadingStep === step.index;
+
+  const push = (s: number, msg: CoachMsg) =>
+    setByStep((m) => ({ ...m, [s]: [...(m[s] ?? []), msg] }));
 
   async function send(text: string) {
     const q = text.trim();
-    if (!q || loading) return;
-    setMessages((m) => [...m, { role: "user", content: q }]);
-    setLoading(true);
+    if (!q || loadingStep !== null) return; // one request at a time (shared thread)
+    const s = step.index; // bucket + spinner belong to the step this was asked from
+    push(s, { role: "user", content: q });
+    setLoadingStep(s);
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: q,
-          threadId,
+          threadId, // shared across steps → backend thread carries the whole session
           activeRecipe: recipeId,
           currentStep:
             `You are currently on Step ${step.index} of ${step.total}: ${step.title}` +
@@ -44,11 +61,11 @@ export function useCoachChat(recipeId: string, step: CoachStep) {
       if (!res.ok) throw new Error(await res.text());
       const d = await res.json();
       if (d.threadId) setThreadId(d.threadId);
-      setMessages((m) => [...m, { role: "assistant", content: d.reply }]);
+      push(s, { role: "assistant", content: d.reply, webSearch: d.webSearch ?? null });
     } catch {
       toast.error("Kiwi couldn't respond. Please try again.");
     } finally {
-      setLoading(false);
+      setLoadingStep(null);
     }
   }
 

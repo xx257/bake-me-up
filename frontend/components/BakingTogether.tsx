@@ -8,6 +8,7 @@ import type { Recipe } from "@/lib/recipes";
 import { formatMinutes } from "@/lib/format";
 import KiwiMark from "./KiwiMark";
 import { useCoachChat } from "./useCoachChat";
+import { WebSearchCard } from "./WebSearchCard";
 import {
   Message,
   MessageContent,
@@ -202,11 +203,11 @@ export default function BakingTogether({
                 </MessageContent>
               </Message>
             ) : (
-              <div
-                key={i}
-                className="rounded-2xl border border-[#e8e0d6] bg-card p-4 text-body"
-              >
-                <MessageResponse>{m.content}</MessageResponse>
+              <div key={i} className="space-y-3">
+                <div className="rounded-2xl border border-[#e8e0d6] bg-card p-4 text-body">
+                  <MessageResponse>{m.content}</MessageResponse>
+                </div>
+                <WebSearchCard webSearch={m.webSearch} />
               </div>
             ),
           )}

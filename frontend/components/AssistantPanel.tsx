@@ -128,8 +128,8 @@ export default function AssistantPanel({
 
   const status = currentStep
     ? `Baking · Step ${currentStep.index}/${currentStep.total}: ${currentStep.title}`
-    : mode === "general"
-      ? "Using general baking knowledge"
+    : mode === "redirect"
+      ? "Let's keep it to baking"
       : `Grounded in ${recipeTitle}`;
 
   return (

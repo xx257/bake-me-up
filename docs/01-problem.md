@@ -2,17 +2,20 @@
 
 ## 1.1 Problem (one sentence)
 
-Home bakers who receive recipes from an instructor, family member, or friend often
-fail to reproduce them successfully because the shared instructions omit the tacit,
-experience-based knowledge needed to execute each step correctly.
+People collect recipes from many places — family, friends, baking classes, cookbooks,
+blogs, personal experimentation — and usually preserve the *recipe*, but lose the
+**knowledge required to successfully recreate it**: why a step is written that way, what
+the dough should look like at each stage, which mistake caused last time's failure, what
+"medium-soft peak" means, what to watch during proofing, and which substitutions are safe.
 
 ## 1.2 Why this is a problem for this user
 
-**Who / what.** The user is a home baker recreating a *specific person's* recipe — a
-family bread handout, an instructor's croissant sheet, a screenshotted note — not a
-polished, test-kitchen cookbook. They want to reproduce it faithfully and
-independently, ideally on the first try, without pinging the original baker for every
-ambiguity.
+**Who / what.** The user is someone recreating recipes they care about from a *personal
+collection* — a grandparent's bread handout, a baking-class sheet, a screenshotted note,
+a cookbook page — not a polished, test-kitchen site. They want to **understand** the
+recipe, **execute** it successfully (ideally first try), **troubleshoot** when it goes
+sideways, and eventually **pass it on** so someone else can recreate it too — all without
+pinging the original baker for every ambiguity.
 
 **Today / why it's not enough.** These recipes list ingredients and steps but assume
 knowledge the author never wrote down — what "tangzhong," "windowpane," or "proof
@@ -22,7 +25,12 @@ terms, YouTube tutorials, texts to the original baker (who may not reply in time
 several phone timers, while guessing at dough state. This constant context-switching
 breaks concentration, the generic web answers aren't tied to *this* recipe's ratios or
 intent, and mistakes surface only after the bake fails — wasting ingredients and
-eroding confidence.
+eroding confidence. The recipe survived; the *experience needed to reproduce it* did not.
+
+**The journey Bake Me Up supports.** Preserve → Discover → Understand → Execute →
+Troubleshoot → Replicate: keep the recipe *and its knowledge* as a structured asset, find
+the right one when it's unknown, understand it before starting, get step-by-step coaching
+while baking, recover from mistakes, and share the whole thing so others succeed too.
 
 ## 1.3 Current ("today") workflow — with pain points
 
@@ -57,7 +65,10 @@ flowchart TD
 
 ## 1.4 Evaluation questions / input–output pairs
 
-Consolidated list used to evaluate the application; also seeds the Task 5 test set.
+Consolidated list used to evaluate the application; also seeds the Task 5 test set. The
+core experience under evaluation is **discovery** (RAG), **grounded coaching / Q&A**,
+**web fallback**, and **honest grounding** (rows 1–6, 10–12); `scale()` / `timeline()`
+(rows 7–9) are **future tools**, not part of the first-pass knowledge & coaching flow.
 
 | #  | Category            | Example question (input)                                | Expected output shape                                   |
 |----|---------------------|--------------------------------------------------------|---------------------------------------------------------|

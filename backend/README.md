@@ -14,16 +14,19 @@ uv run --project backend langgraph dev    # local in-memory dev server + Studio 
 ```
 
 The graph (`agent/graph.py:graph`) is a context-gated **router** → three lanes:
-- **plan** — extract intent → retrieve recipe **profiles** from Qdrant → rank & explain (the
-  planning RAG lane);
-- **bake** — load the **full selected recipe** into the coach's context and answer grounded in
-  it (V0.1: full-context, no per-question retrieval);
-- **general** — general baking knowledge when the library doesn't cover the ask.
+- **discover** — an agentic node that binds **two tools** and calls **exactly one**:
+  `search_collection` (recipe **profiles** from Qdrant → rank & explain) for finding/comparing/
+  recommending a recipe, or `search_baking_web` (Tavily) for a **standalone baking-knowledge**
+  question the collection doesn't cover. A missing/ambiguous choice retries once, then returns a
+  graceful error — never silently recommends. Tavily is knowledge-only, never used to fetch recipes;
+- **coach** — a recipe is active: load the **full recipe** into context and answer grounded in it
+  (no per-question retrieval), with Tavily as a fallback for what the recipe can't answer;
+- **redirect** — off-topic guard: declines and steers back to baking, no tools.
 
 All chat LLM calls go through the **Vercel AI Gateway**; per-session **thread** memory (managed
-Postgres checkpointer) carries the planning goal into baking. **V0.1 retrieval decision:
-Planning = Retrieval, Coaching = Full Recipe Context** — `retrieve(recipe_id=…)` in
-`agent/retrieval.py` is built but unwired until the corpus grows.
+Postgres checkpointer) carries the discovery goal into baking. **Retrieval decision:
+Discovery = Retrieval, Coaching = Full Recipe Context** — the chunk retriever
+(`retrieve_recipes` in `agent/retrieval.py`) is built but unwired; discovery uses recipe profiles.
 
 ### Ingest the corpus
 
@@ -34,7 +37,8 @@ uv run --project backend python -m agent.ingest embed   # embed + upsert into Qd
 
 ## Layout
 
-- `agent/graph.py` — the LangGraph agent: router → plan / bake / general (grows to add Tavily / scale / timeline).
+- `agent/graph.py` — the LangGraph agent: router → discover / coach / redirect; defines `search_collection` and picks one discovery tool per turn.
+- `agent/tools.py` — `search_baking_web` (Tavily), a traced first-class tool span with graceful fallback.
 - `agent/{config,retrieval,ingest}.py` — lazy clients, dense retrieval, ingestion pipeline.
 - `../langgraph.json` — LangGraph Platform / CLI config at the **repo root** (`dependencies: ["./backend"]`, graph id `agent`).
 - `pyproject.toml` — deps (managed with `uv`).

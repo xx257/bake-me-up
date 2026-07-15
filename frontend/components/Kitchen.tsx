@@ -18,6 +18,7 @@ import {
   ToolInput,
   ToolOutput,
 } from "@/components/ai-elements/tool";
+import { WebSearchCard, type WebSearchCall } from "@/components/WebSearchCard";
 
 const PLAN_STAGES = [
   "Understanding your request",
@@ -33,7 +34,7 @@ const QUICK = [
   "Dessert for friends",
 ];
 
-type QA = { q: string; a: string };
+type QA = { q: string; a: string; webSearch?: WebSearchCall[] | null };
 type ToolCall = {
   name: string;
   input: Record<string, unknown>;
@@ -67,6 +68,9 @@ export default function Kitchen({ featured }: { featured?: Featured }) {
   const [pendingQ, setPendingQ] = useState<string | null>(null); // question in-flight
   const [showEarlier, setShowEarlier] = useState(false);
   const [tool, setTool] = useState<ToolCall | null>(null);
+  const [introWebSearch, setIntroWebSearch] = useState<WebSearchCall[] | null>(
+    null,
+  );
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -96,6 +100,7 @@ export default function Kitchen({ featured }: { featured?: Featured }) {
       const d = await res.json();
       if (d.threadId) setThreadId(d.threadId);
       const reply = (d.reply ?? "").trim();
+      const web: WebSearchCall[] | null = d.webSearch ?? null;
       const recs: Rec[] = d.recommendations ?? [];
       // The planner often re-returns the SAME pick on a follow-up; only a genuinely different
       // recipe is a "new recommendation" that resets the conversation.
@@ -106,17 +111,20 @@ export default function Kitchen({ featured }: { featured?: Featured }) {
         // De-dup by id so a repeated id can't double-render or collide on React keys.
         setCards(recs.filter((r, i) => recs.findIndex((x) => x.id === r.id) === i));
         setIntro(reply);
+        setIntroWebSearch(null); // recommendation results carry no web card
         setQa([]);
         setShowEarlier(false);
         setTool(d.tool ?? null);
       } else if (hadRec) {
         // Follow-up about the current pick (same recipe re-returned, or a general answer)
         // → append to the conversation; keep the recommendation pinned.
-        setQa((prev) => [...prev, { q, a: reply }]);
+        setQa((prev) => [...prev, { q, a: reply, webSearch: web }]);
         setTool((prev) => d.tool ?? prev);
       } else {
-        // No recommendation yet (clarifying question / redirect) → framing note.
+        // No recommendation yet (clarifying question, standalone knowledge answer, or redirect)
+        // → framing note; a standalone knowledge answer carries a "Searched the web" card.
         setIntro(reply);
+        setIntroWebSearch(web);
         setTool((prev) => d.tool ?? prev);
       }
     } catch {
@@ -134,6 +142,7 @@ export default function Kitchen({ featured }: { featured?: Featured }) {
     setStarted(false);
     setCards([]);
     setIntro("");
+    setIntroWebSearch(null);
     setQa([]);
     setShowEarlier(false);
     setPendingQ(null);
@@ -160,12 +169,18 @@ export default function Kitchen({ featured }: { featured?: Featured }) {
 
         {/* Intro note — the framing that came with the current recommendation */}
         {intro && (
-          <div className="mt-6 flex items-start gap-3">
-            <KiwiMark size={30} className="mt-0.5 shrink-0" />
-            <div className="min-w-0 flex-1 rounded-2xl border border-border bg-card p-4 text-body">
-              <MessageResponse>{intro}</MessageResponse>
+          <>
+            <div className="mt-6 flex items-start gap-3">
+              <KiwiMark size={30} className="mt-0.5 shrink-0" />
+              <div className="min-w-0 flex-1">
+                <div className="rounded-2xl border border-border bg-card p-4 text-body">
+                  <MessageResponse>{intro}</MessageResponse>
+                </div>
+              </div>
             </div>
-          </div>
+            {/* Web card full-width at the content edge (aligned with the collection card). */}
+            <WebSearchCard webSearch={introWebSearch} />
+          </>
         )}
 
         {/* Initial recommendation loading (a follow-up's spinner lives in the notes below). */}
@@ -298,6 +313,10 @@ export default function Kitchen({ featured }: { featured?: Featured }) {
                           <MessageResponse>{ex.a}</MessageResponse>
                         </div>
                       </div>
+                      {/* Web card rendered OUTSIDE the answer bubble — MessageResponse is
+                          `size-full`, so a nested sibling overflows a stretched flex item.
+                          Full-width at the content edge, aligned with "Searched your collection". */}
+                      <WebSearchCard webSearch={ex.webSearch} />
                     </div>
                   ))}
                   {loading && pendingQ && (

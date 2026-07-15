@@ -81,6 +81,7 @@ export async function POST(request: Request) {
       mode: state.mode ?? null,
       recommendations: state.recommendations ?? [],
       tool: state.tool ?? null,
+      webSearch: state.web_search ?? null,
     });
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 502 });
