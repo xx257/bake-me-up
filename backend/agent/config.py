@@ -37,3 +37,16 @@ def get_qdrant_client():
     from qdrant_client import QdrantClient
 
     return QdrantClient(url=os.environ["QDRANT_URL"], api_key=os.environ["QDRANT_API_KEY"])
+
+
+def warmup() -> None:
+    """Pre-build the lazy clients (and warm the embeddings HTTP path) so the FIRST real
+    request doesn't pay client construction + first Qdrant TLS connect (~2-3s otherwise).
+    Best-effort: any failure is swallowed. Safe to call repeatedly (clients are cached)."""
+    try:
+        get_qdrant_client()
+        get_chat_llm()
+        get_chat_llm(mini=True)
+        get_embeddings().embed_query("warmup")
+    except Exception:  # noqa: BLE001 — warmup is optional; never break the app
+        pass

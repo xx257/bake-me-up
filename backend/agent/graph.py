@@ -19,6 +19,7 @@ graph is compiled without a checkpointer. Clients are lazy.
 from __future__ import annotations
 
 import logging
+import os
 from typing import Annotated, Literal, TypedDict
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
@@ -576,3 +577,14 @@ def build_graph(checkpointer=None):
 
 # LangGraph Platform / `langgraph dev` import this module-level `graph`.
 graph = build_graph()
+
+# Prime the lazy clients in the background at container start, so the first real request
+# skips ~2-3s of client construction + first Qdrant connect. Only when creds are present
+# (keeps import keyless for tests / deploy-time validation); daemon + best-effort so it can
+# never block or break import.
+if os.environ.get("OPENAI_API_KEY") and os.environ.get("QDRANT_URL"):
+    import threading
+
+    from .config import warmup
+
+    threading.Thread(target=warmup, daemon=True).start()
