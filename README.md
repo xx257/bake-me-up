@@ -9,7 +9,7 @@ bake it step-by-step, recover from mistakes, and pass it on so others can recrea
 > AI Makerspace Certification Challenge v1.0 project.
 >
 > **📄 Submission write-up (all 7 tasks in one doc):** [`SUBMISSION.md`](SUBMISSION.md)
-> · **Live:** [bake-me-up.vercel.app](https://bake-me-up.vercel.app) · **Demo:** _Loom link — TBD_
+> · **Live:** [bake-me-up.vercel.app](https://bake-me-up.vercel.app) · **Demo:** [Part 1](https://www.loom.com/share/ed627f9e859644ec8e0dd28c7af5895d) · [Part 2](https://www.loom.com/share/68a04162924943958895838c100113bc)
 
 ## Problem
 
@@ -49,7 +49,8 @@ coaching, sharing one `threadId` so context never repeats.
   **redirect** (off-topic guard, no tools). Per-session **thread** memory (managed Postgres).
 - **LLM:** chat + mini models behind the **Vercel AI Gateway**.
 - **Retrieval — only when it adds value:** Qdrant Cloud + OpenAI embeddings power
-  **discovery** (`search_collection` over recipe **profiles**) when the recipe is *unknown*.
+  **discovery** (`search_collection` — **parent-child** over fixed-150 recipe chunks: retrieve
+  children → dedupe by `recipe_id` → full recipes) when the recipe is *unknown*.
   When the recipe is *known*, the coach loads the full recipe into context — no per-question
   RAG (a recipe fits the window). Workflow control is deterministic.
 - **External:** Tavily web search — a **baking-knowledge** tool: a discovery tool for
