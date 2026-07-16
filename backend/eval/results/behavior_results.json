@@ -1,0 +1,73 @@
+{
+  "cases": [
+    {
+      "id": "b01",
+      "category": "collection_request",
+      "question": "I want something fluffy and not too sweet - what should I make?",
+      "expected": {
+        "mode": "discover",
+        "tool": "search_collection",
+        "web_search": false
+      },
+      "actual": {
+        "mode": "discover",
+        "tool": "search_collection",
+        "web_search": false,
+        "reply": "I'd go with the Japanese Cheesecake. It's light, fluffy, and has a mild, tangy sweetness rather than being overly sugary. Serve it with berries or tea for a balanced treat."
+      },
+      "pass": true
+    },
+    {
+      "id": "b02",
+      "category": "standalone_knowledge",
+      "question": "Why does yudane make bread softer?",
+      "expected": {
+        "mode": "discover",
+        "tool": "search_baking_web",
+        "web_search": true
+      },
+      "actual": {
+        "mode": "discover",
+        "tool": null,
+        "web_search": true,
+        "reply": "Yudane makes bread softer because it involves mixing boiling water with flour before making the dough. This process gelatinizes the starches in the flour, allowing the dough to hold more moisture. As a result, the baked bread stays softer a"
+      },
+      "pass": true
+    },
+    {
+      "id": "b03",
+      "category": "off_topic",
+      "question": "What's the weather like today?",
+      "expected": {
+        "mode": "redirect",
+        "tool": null,
+        "web_search": false
+      },
+      "actual": {
+        "mode": "redirect",
+        "tool": null,
+        "web_search": false,
+        "reply": "I'm focused on baking and recipe guidance, so I can't provide weather updates. However, I\u2019d be happy to help you with recipes, baking techniques, troubleshooting, or choosing what to bake!"
+      },
+      "pass": true
+    },
+    {
+      "id": "b04",
+      "category": "pinned_knowledge_gap",
+      "question": "What's the sodium content per slice?",
+      "expected": {
+        "mode": "discover",
+        "tool": "search_baking_web",
+        "web_search": true
+      },
+      "actual": {
+        "mode": "discover",
+        "tool": null,
+        "web_search": false,
+        "reply": "The recipe uses 6 g of salt for one loaf. Standard table salt contains about 2,300 mg of sodium per 6 g. The loaf is divided into two 325 g pieces, but both are baked together as one loaf.\n\nIf you slice the loaf into 12 equal pieces, each s"
+      },
+      "pass": false
+    }
+  ],
+  "pass_rate": 0.75
+}

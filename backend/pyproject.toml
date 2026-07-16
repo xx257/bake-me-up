@@ -20,6 +20,12 @@ dependencies = [
 dev = [
     "langgraph-cli[inmem]>=0.1.55",
 ]
+# Task 5/6 evaluation harness (RAGAS + dataset). Not shipped in the deployed wheel.
+eval = [
+    "ragas>=0.2.10,<0.3",
+    "datasets>=2.0",
+    "langchain-community>=0.3.0,<0.4",
+]
 
 [build-system]
 requires = ["hatchling"]

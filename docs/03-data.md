@@ -94,7 +94,10 @@ frontmatter for structure/tools + a prose body for RAG (see
 
 ## Retrieval experiment (Task 6)
 
-The baseline (fixed-150 dense) is one point in a **controlled retrieval experiment** —
-baseline vs. one advanced variant, holding everything else constant and varying a single
-factor at a time. That experiment and its metrics live in
-[`evaluation.md`](evaluation.md).
+The baseline (fixed-150 dense) is one point in a **controlled retrieval experiment** against an
+advanced retriever — **parent-child** (retrieve child chunks to identify the source recipe, then
+answer from the full recipe body). Two physical collections drive three configs, changing one
+factor at a time: `eval_150` is shared by **fixed-150** (answer from raw children) and
+**parent-child-150** (answer from full recipes) so their retrieval is identical by construction;
+`eval_250` isolates the child-chunk-size variable (**parent-child-250**). The experiment, metrics,
+and results live in [`evaluation.md`](evaluation.md).

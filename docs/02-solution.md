@@ -96,7 +96,7 @@ flowchart LR
 | Agent framework    | LangGraph (Python)              | Explicit graph gives controllable routing + built-in thread memory          |
 | Router             | LLM classifier (mini)           | Recipe active → coach (no RAG); baking → discover; off-topic → redirect      |
 | Recipe knowledge base | Committed `catalog.json` + Qdrant profiles | Ships full recipe bodies (for the coach) + recipe profiles (for discovery `search_collection`) with the deploy |
-| LLM                | OpenAI gpt-4o / gpt-4o-mini     | 4o coaches; mini does routing + intent extraction                           |
+| LLM                | Chat + mini models via Vercel AI Gateway | chat model coaches, ranks, and synthesizes; mini model routes + authors the discovery tool's search args |
 | **LLM gateway**    | **Vercel AI Gateway**           | Required by Task 2; the chat LLM's `base_url` in the Python backend          |
 | Embedding model    | OpenAI text-embedding-3-small   | Cheap, high-quality; embeddings go direct to OpenAI                          |
 | Vector database    | Qdrant Cloud                    | **Recipe profiles** (dense) for discovery `search_collection` retrieval      |
