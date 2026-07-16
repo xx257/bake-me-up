@@ -42,7 +42,7 @@ export function WebSearchCard({
                   <ul className="space-y-1.5 p-3 text-sm">
                     {w.sources.length === 0 ? (
                       <li className="text-muted-foreground">
-                        No sources returned.
+                        No linked sources for this query.
                       </li>
                     ) : (
                       w.sources.map((s) => (

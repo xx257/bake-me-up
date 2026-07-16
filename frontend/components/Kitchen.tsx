@@ -12,12 +12,9 @@ import RecipeImage from "@/components/RecipeImage";
 import KiwiMark from "@/components/KiwiMark";
 import ReasoningStages from "@/components/ReasoningStages";
 import {
-  Tool,
-  ToolContent,
-  ToolHeader,
-  ToolInput,
-  ToolOutput,
-} from "@/components/ai-elements/tool";
+  CollectionSearchCard,
+  type ToolCall,
+} from "@/components/CollectionSearchCard";
 import { WebSearchCard, type WebSearchCall } from "@/components/WebSearchCard";
 
 const PLAN_STAGES = [
@@ -34,18 +31,11 @@ const QUICK = [
   "Dessert for friends",
 ];
 
-type QA = { q: string; a: string; webSearch?: WebSearchCall[] | null };
-type ToolCall = {
-  name: string;
-  input: Record<string, unknown>;
-  considered: {
-    title: string;
-    category: string;
-    difficulty?: string;
-    total_time_min?: number;
-    score?: number;
-  }[];
-  state: string;
+type QA = {
+  q: string;
+  a: string;
+  webSearch?: WebSearchCall[] | null;
+  tool?: ToolCall | null;
 };
 type Rec = {
   id: string;
@@ -67,7 +57,7 @@ export default function Kitchen({ featured }: { featured?: Featured }) {
   const [qa, setQa] = useState<QA[]>([]); // follow-up notes about the current recommendation
   const [pendingQ, setPendingQ] = useState<string | null>(null); // question in-flight
   const [showEarlier, setShowEarlier] = useState(false);
-  const [tool, setTool] = useState<ToolCall | null>(null);
+  const [introTool, setIntroTool] = useState<ToolCall | null>(null);
   const [introWebSearch, setIntroWebSearch] = useState<WebSearchCall[] | null>(
     null,
   );
@@ -114,18 +104,17 @@ export default function Kitchen({ featured }: { featured?: Featured }) {
         setIntroWebSearch(null); // recommendation results carry no web card
         setQa([]);
         setShowEarlier(false);
-        setTool(d.tool ?? null);
+        setIntroTool(d.tool ?? null); // the retrieval that found this pick
       } else if (hadRec) {
         // Follow-up about the current pick (same recipe re-returned, or a general answer)
-        // → append to the conversation; keep the recommendation pinned.
-        setQa((prev) => [...prev, { q, a: reply, webSearch: web }]);
-        setTool((prev) => d.tool ?? prev);
+        // → append to the conversation; attach this turn's tool card to the turn itself.
+        setQa((prev) => [...prev, { q, a: reply, webSearch: web, tool: d.tool ?? null }]);
       } else {
         // No recommendation yet (clarifying question, standalone knowledge answer, or redirect)
         // → framing note; a standalone knowledge answer carries a "Searched the web" card.
         setIntro(reply);
         setIntroWebSearch(web);
-        setTool((prev) => d.tool ?? prev);
+        setIntroTool(d.tool ?? null);
       }
     } catch {
       toast.error("Couldn't reach the planner. Please try again.");
@@ -146,7 +135,7 @@ export default function Kitchen({ featured }: { featured?: Featured }) {
     setQa([]);
     setShowEarlier(false);
     setPendingQ(null);
-    setTool(null);
+    setIntroTool(null);
     setInput("");
     setThreadId(null);
   }
@@ -178,7 +167,8 @@ export default function Kitchen({ featured }: { featured?: Featured }) {
                 </div>
               </div>
             </div>
-            {/* Web card full-width at the content edge (aligned with the collection card). */}
+            {/* Retrieval + web cards below the reply, at the content edge. */}
+            <CollectionSearchCard tool={introTool} />
             <WebSearchCard webSearch={introWebSearch} />
           </>
         )}
@@ -313,9 +303,10 @@ export default function Kitchen({ featured }: { featured?: Featured }) {
                           <MessageResponse>{ex.a}</MessageResponse>
                         </div>
                       </div>
-                      {/* Web card rendered OUTSIDE the answer bubble — MessageResponse is
+                      {/* Tool cards rendered OUTSIDE the answer bubble — MessageResponse is
                           `size-full`, so a nested sibling overflows a stretched flex item.
-                          Full-width at the content edge, aligned with "Searched your collection". */}
+                          Full-width at the content edge, below this turn's reply. */}
+                      <CollectionSearchCard tool={ex.tool} />
                       <WebSearchCard webSearch={ex.webSearch} />
                     </div>
                   ))}
@@ -337,50 +328,6 @@ export default function Kitchen({ featured }: { featured?: Featured }) {
               </div>
             )}
 
-            {/* Retrieval card — kept for the RAG demo, quiet + collapsed */}
-            {tool && tool.considered.length > 0 && (
-              <div className="mt-6">
-                <Tool defaultOpen={false}>
-                  <ToolHeader
-                    title="Searched your collection"
-                    type="tool-search_collection"
-                    state="output-available"
-                  />
-                  <ToolContent>
-                    <ToolInput input={tool.input} />
-                    <ToolOutput
-                      errorText={undefined}
-                      output={
-                        <ul className="space-y-1.5 p-3 text-sm">
-                          {tool.considered.map((c) => (
-                            <li
-                              key={c.title}
-                              className="flex items-center justify-between gap-3"
-                            >
-                              <span>{c.title}</span>
-                              <span className="flex items-center gap-2.5 text-muted-foreground">
-                                <span>
-                                  {c.category}
-                                  {c.total_time_min ? ` · ~${c.total_time_min}m` : ""}
-                                </span>
-                                {typeof c.score === "number" && (
-                                  <span
-                                    className="font-mono text-xs text-muted-foreground/70"
-                                    title="cosine similarity"
-                                  >
-                                    {c.score.toFixed(2)}
-                                  </span>
-                                )}
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      }
-                    />
-                  </ToolContent>
-                </Tool>
-              </div>
-            )}
           </div>
         )}
 
