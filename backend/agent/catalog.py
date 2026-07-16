@@ -1,7 +1,8 @@
 """Recipe catalog loader (v2).
 
 Serves both modes:
-- Planning: `profile_text()` is embedded into Qdrant; `card()` is the UI-facing metadata.
+- Discovery: `get_entry()` / `card()` provide the full recipe body + UI-facing card metadata for
+  the parent recipes returned by retrieval (`agent.retrieval`).
 - Baking: `get_body()` returns the full normalized markdown for the coach's context.
 """
 
@@ -52,17 +53,3 @@ def card(entry: dict) -> dict:
     # UI expects `est_time_min` on the card.
     c["est_time_min"] = entry.get("total_time_min")
     return c
-
-
-def profile_text(entry: dict) -> str:
-    """Semantic blob embedded for planning-mode retrieval."""
-    j = lambda xs: ", ".join(xs or [])  # noqa: E731
-    return (
-        f"{entry['title']}. {entry.get('summary', '')} "
-        f"Category: {entry['category']['label']}. Difficulty: {entry.get('difficulty')}. "
-        f"About {entry.get('total_time_min')} minutes (~{entry.get('active_time_min')} active). "
-        f"Taste: {j(entry.get('taste'))}. Texture: {j(entry.get('texture'))}. "
-        f"Good for: {j(entry.get('occasion'))}. Pairs with: {j(entry.get('pairs_with'))}. "
-        f"Key ingredients: {j(entry.get('ingredients', [])[:8])}. "
-        f"Skills: {j(entry.get('skills'))}. Tags: {j(entry.get('tags'))}."
-    )

@@ -1,14 +1,17 @@
 """Recipe ingestion → Qdrant (dense).
 
-Implements the rule from docs/03-data.md:
+Parsing rule:
   - parse YAML frontmatter for metadata (NOT embedded),
-  - structure-aware chunks of the PROSE body only,
-  - each step: embed the `#### Recipe` prose, STRIP the `#### Workflow` YAML block,
+  - clean the PROSE body only (strip the `#### Workflow` YAML blocks + `#### Recipe` headings),
   - skip TEMPLATE.md and README.md.
 
-The parsing half (`parse_recipe`, `iter_chunks`) is pure-Python and testable with no
-API keys:  `uv run python -m agent.ingest parse`
-The embed+upload half needs OPENAI_* and QDRANT_* env:  `uv run python -m agent.ingest embed`
+Production embeds **fixed-150 token child chunks** (each chunk keeps its parent `recipe_id`),
+which the parent-child retriever in `agent.retrieval` reads.
+
+The parsing half (`parse_recipe`) is pure-Python and testable with no API keys:
+  `uv run python -m agent.ingest parse`
+The embed half needs OPENAI_* and QDRANT_* env:
+  `uv run python -m agent.ingest fixed`
 """
 
 from __future__ import annotations
@@ -104,61 +107,6 @@ def parse_recipe(path: Path) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     return meta, chunks
 
 
-def iter_chunks(recipe_dir: Path = RECIPE_DIR) -> list[dict[str, Any]]:
-    """All embeddable chunks across the corpus (skips TEMPLATE.md / README.md)."""
-    out: list[dict[str, Any]] = []
-    for path in sorted(recipe_dir.glob("*.md")):
-        if path.name in SKIP_FILES:
-            continue
-        _, chunks = parse_recipe(path)
-        out.extend(chunks)
-    return out
-
-
-def embed_and_upload(recipe_dir: Path = RECIPE_DIR) -> int:
-    """Embed all chunks and upsert into Qdrant. Needs OPENAI_* and QDRANT_* env."""
-    import os
-
-    from dotenv import load_dotenv
-    from langchain_openai import OpenAIEmbeddings
-    from langchain_qdrant import QdrantVectorStore
-    from qdrant_client import QdrantClient
-    from qdrant_client.models import Distance, PayloadSchemaType, VectorParams
-
-    load_dotenv()
-    collection = os.environ.get("QDRANT_COLLECTION", "bake_me_up_recipes")
-
-    client = QdrantClient(url=os.environ["QDRANT_URL"], api_key=os.environ["QDRANT_API_KEY"])
-    if client.collection_exists(collection):
-        client.delete_collection(collection)
-    client.create_collection(
-        collection,
-        vectors_config=VectorParams(size=EMBED_DIM, distance=Distance.COSINE),
-    )
-    # Payload index so retrieval can filter to the active recipe (Qdrant requires an
-    # index on any field used in a filter).
-    client.create_payload_index(
-        collection_name=collection,
-        field_name="metadata.recipe_id",
-        field_schema=PayloadSchemaType.KEYWORD,
-    )
-
-    # Embeddings go DIRECT to OpenAI (reads OPENAI_API_KEY from env); the Vercel AI
-    # Gateway fronts the chat LLM, not embeddings.
-    embeddings = OpenAIEmbeddings(
-        model=os.environ.get("EMBEDDING_MODEL", "text-embedding-3-small"),
-    )
-    store = QdrantVectorStore(client=client, collection_name=collection, embedding=embeddings)
-
-    chunks = iter_chunks(recipe_dir)
-    store.add_texts(
-        texts=[c["text"] for c in chunks],
-        metadatas=[c["metadata"] for c in chunks],
-    )
-    print(f"Uploaded {len(chunks)} chunks to Qdrant collection '{collection}'.")
-    return len(chunks)
-
-
 def _parse_report(recipe_dir: Path = RECIPE_DIR) -> None:
     """Offline sanity check: chunk counts + assert no workflow/frontmatter leakage."""
     total = 0
@@ -179,49 +127,7 @@ def _parse_report(recipe_dir: Path = RECIPE_DIR) -> None:
     print(f"\nTotal: {total} chunks across the corpus. No workflow/frontmatter leakage. ✅")
 
 
-def embed_profiles() -> int:
-    """Embed recommendation profiles into the Qdrant profiles collection (Planning Mode).
-
-    Payload = the full catalog entry minus the heavy body, so a profile hit already
-    carries everything the ranker and the UI card need.
-    """
-    import os
-
-    from dotenv import load_dotenv
-    from langchain_openai import OpenAIEmbeddings
-    from qdrant_client.models import Distance, PointStruct, VectorParams
-
-    from .catalog import get_catalog, profile_text
-    from .config import get_qdrant_client
-
-    load_dotenv()
-    collection = os.environ.get("QDRANT_PROFILES_COLLECTION", "bake_me_up_profiles")
-    client = get_qdrant_client()
-    if client.collection_exists(collection):
-        client.delete_collection(collection)
-    client.create_collection(
-        collection, vectors_config=VectorParams(size=EMBED_DIM, distance=Distance.COSINE)
-    )
-
-    embeddings = OpenAIEmbeddings(
-        model=os.environ.get("EMBEDDING_MODEL", "text-embedding-3-small")
-    )
-    entries = get_catalog()
-    vectors = embeddings.embed_documents([profile_text(e) for e in entries])
-    points = [
-        PointStruct(
-            id=i,
-            vector=vectors[i],
-            payload={k: v for k, v in e.items() if k != "body"},
-        )
-        for i, e in enumerate(entries)
-    ]
-    client.upsert(collection_name=collection, points=points)
-    print(f"Embedded {len(points)} recipe profiles -> Qdrant collection '{collection}'.")
-    return len(points)
-
-
-# ── Fixed-size (token) chunking — Task 6 dense baseline ──────────────────────
+# ── Fixed-size (token) chunking — production child chunks ────────────────────
 def _token_chunks(text: str, size: int, overlap: int = 0, encoding: str = "cl100k_base") -> list[str]:
     """Naive fixed-size chunks by TOKEN count (the conventional dense-RAG baseline)."""
     import tiktoken
@@ -311,14 +217,7 @@ if __name__ == "__main__":
         _parse_report()
     elif cmd == "fixed-report":
         _fixed_report()
-    elif cmd == "embed":
-        embed_and_upload()
     elif cmd == "fixed":
         embed_fixed()
-    elif cmd == "profiles":
-        embed_profiles()
     else:
-        sys.exit(
-            f"unknown command: {cmd!r} "
-            "(use 'parse', 'fixed-report', 'embed', 'fixed', or 'profiles')"
-        )
+        sys.exit(f"unknown command: {cmd!r} (use 'parse', 'fixed-report', or 'fixed')")

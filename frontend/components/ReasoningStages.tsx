@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { Check, Loader2 } from "lucide-react";
 
 // A quiet, staged "what the agent is doing" indicator, shown while a turn is in flight —
-// in place of a bare "Thinking…". The stages mirror the real pipeline (e.g. planning:
-// extract intent → retrieve profiles → rank).
+// in place of a bare "Thinking…". The stages mirror the real pipeline (e.g. discovery:
+// search collection → rank recipes).
 export default function ReasoningStages({ stages }: { stages: string[] }) {
   const [active, setActive] = useState(0);
 
