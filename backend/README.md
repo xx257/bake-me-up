@@ -43,5 +43,4 @@ uv run --project backend python -m agent.ingest embed   # embed + upsert into Qd
 - `../langgraph.json` — LangGraph Platform / CLI config at the **repo root** (`dependencies: ["./backend"]`, graph id `agent`).
 - `pyproject.toml` — deps (managed with `uv`).
 
-See `../docs/02-solution.md` for the architecture and `../docs/03-data.md` for the
-ingestion/chunking rules.
+See [`../SUBMISSION.md`](../SUBMISSION.md) for the full architecture, data, and evaluation write-up.

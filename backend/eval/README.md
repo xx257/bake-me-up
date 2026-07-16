@@ -1,7 +1,7 @@
 # Evaluation harness (Tasks 5 / 6)
 
-Isolated eval code — **not** part of the deployed agent. See [`docs/evaluation.md`](../../docs/evaluation.md)
-for the full write-up and results.
+Isolated eval code — **not** part of the deployed agent. See [`SUBMISSION.md`](../../SUBMISSION.md)
+(Tasks 5 & 6) for the full write-up and results; raw outputs live in `results/`.
 
 ## Layout
 - `testset.jsonl` — 14 hand-written cases (10 retrieval + 4 behavior), grounded in the corpus.

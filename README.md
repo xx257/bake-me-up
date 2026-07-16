@@ -18,7 +18,7 @@ blogs, personal experimentation — and usually preserve the *recipe*, but lose 
 **knowledge required to recreate it**: why a step is written that way, what the dough should
 look like, which mistake caused last time's failure, what "medium-soft peak" means. Most
 recipe systems store instructions; very few preserve the experience needed to succeed. See
-[`docs/01-problem.md`](docs/01-problem.md).
+[`SUBMISSION.md`](SUBMISSION.md).
 
 ## Experience
 
@@ -56,7 +56,7 @@ coaching, sharing one `threadId` so context never repeats.
   standalone questions (never to fetch recipes) and a coach fallback; shown as a visible card.
 - **Monitoring:** LangSmith · **Eval:** RAGAS + discovery quality + LLM-judge.
 
-Full write-up: [`docs/02-solution.md`](docs/02-solution.md).
+Full write-up: [`SUBMISSION.md`](SUBMISSION.md).
 
 ## Run locally
 
@@ -78,17 +78,9 @@ managed deploy of the `agent` graph (repo-root `langgraph.json`).
   `tools.py` (`search_baking_web`), `retrieval.py`, `catalog.py` / `ingest.py`
 - `backend/eval/` — Task 5/6 evaluation harness (isolated; never runs in production)
 - `frontend/` — Next.js app (Kitchen · Recipe page · Coach Mode) + `app/api/chat` proxy
-- `data/recipes/` — the 6-recipe corpus · `docs/` — per-task write-ups · `SUBMISSION.md` — consolidated
+- `data/recipes/` — the 6-recipe corpus · `SUBMISSION.md` — the full write-up (all 7 tasks)
 
-## Docs
+## Submission
 
-- **[`SUBMISSION.md`](SUBMISSION.md) — consolidated write-up: every deliverable (Tasks 1–7 + Final) in one document.**
-
-Per-task source docs (linked from the write-up):
-
-- [`docs/01-problem.md`](docs/01-problem.md) — Task 1: problem, audience, scope, eval questions
-- [`docs/02-solution.md`](docs/02-solution.md) — Task 2: solution, infra & agent diagrams
-- [`docs/03-data.md`](docs/03-data.md) — Task 3: data sources + chunking strategy
-- [`docs/04-prototype.md`](docs/04-prototype.md) — Task 4: end-to-end prototype + public deployment
-- [`docs/evaluation.md`](docs/evaluation.md) — Tasks 5 & 6: test dataset, eval harness, results
-- [`docs/07-next-steps.md`](docs/07-next-steps.md) — Task 7: next steps (keep vs. improve)
+**[`SUBMISSION.md`](SUBMISSION.md)** — the complete written document: every deliverable
+(Tasks 1–7 + Final Submission) in one place, with the diagrams, tables, and eval results inline.

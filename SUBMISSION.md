@@ -8,8 +8,8 @@ it* (notes, tips, troubleshooting, workflow) — into a guided baking experience
 - **Repo:** <https://github.com/xx257/bake-me-up>
 - **Demo (Loom, ≤10 min):** _link — TBD_
 
-> This document consolidates all deliverables (Tasks 1–7 + Final Submission). Each task's detailed
-> source doc is under [`docs/`](docs/) and the runnable code is in `backend/` and `frontend/`.
+> This document is the complete write-up — every deliverable (Tasks 1–7 + Final Submission). The
+> runnable code is in `backend/` (LangGraph agent + `backend/eval/` harness) and `frontend/`.
 
 ---
 
@@ -89,8 +89,6 @@ fallback, honest grounding); rows 7–9 (`scale()` / `timeline()`) are **future 
 | 10 | Guidance / tracking | "What's my next step?"                                 | Correct next step given session state                   |
 | 11 | Grounding / honesty | "What's the sodium content per slice?" (not in recipe) | States it's not in the recipe; offers to search; no fabrication |
 | 12 | Out-of-scope        | "What's a good stock to buy?"                          | Politely declines, stays in the baking domain           |
-
-_Full detail: [`docs/01-problem.md`](docs/01-problem.md)._
 
 ---
 
@@ -207,8 +205,6 @@ discovery tools surface as visible UI cards ("Searched your collection" / "Searc
 **Requirements coverage:** LLM gateway (Vercel AI Gateway) ✅ · memory (LangGraph checkpointer,
 Postgres) ✅ · runs in a phone/laptop browser (Next.js on Vercel) ✅.
 
-_Full detail: [`docs/02-solution.md`](docs/02-solution.md)._
-
 ---
 
 # Task 3 — Dealing with the Data
@@ -253,8 +249,6 @@ the window.
 > 150-token chunk retriever is the **Task-6 experiment baseline** (built in `agent/ingest.py` +
 > `retrieve_recipes`, evaluated in Task 6, not wired into the live discovery path).
 
-_Full detail: [`docs/03-data.md`](docs/03-data.md)._
-
 ---
 
 # Task 4 — End-to-End Agentic RAG Prototype (built + deployed)
@@ -276,8 +270,6 @@ session; off-topic turns hit the `redirect` guard.
   service, graph id `agent`, Postgres checkpointer). A Next.js server route
   (`frontend/app/api/chat/route.ts`) proxies to the LangGraph deployment, holding the API key
   server-side and running each turn on the per-session `threadId`.
-
-_Full detail: [`docs/04-prototype.md`](docs/04-prototype.md)._
 
 ---
 
@@ -304,7 +296,13 @@ motivating the Task 6 experiment. The behavior subset routed **3/4** as designed
 pinned-recipe nutrition question answered from parametric knowledge instead of invoking Tavily) is
 **surfaced honestly** — the web fallback is available but model-discretionary.
 
-_Full detail + reproduce commands: [`docs/evaluation.md`](docs/evaluation.md)._
+**Reproduce** (all eval code lives in `backend/eval/`; results in `backend/eval/results/`):
+
+```bash
+uv run --project backend --group eval python backend/eval/build_collections.py   # (re)build eval collections
+uv run --project backend --group eval python backend/eval/run_eval.py            # retrieval subset (Task 6)
+uv run --project backend --group eval python backend/eval/run_behavior.py        # behavior subset (Task 5)
+```
 
 ---
 
@@ -340,8 +338,6 @@ construction (asserted row-by-row) — only the answer context differs.
   independent stages) — the fixed/pc-150 concept-query miss fails both. **parent-child-150 is the
   balanced choice**; 250 is the option when identification recall matters more than token cost.
 
-_Full detail: [`docs/evaluation.md`](docs/evaluation.md)._
-
 ---
 
 # Task 7 — Next Steps
@@ -372,15 +368,12 @@ _Full detail: [`docs/evaluation.md`](docs/evaluation.md)._
   through-the-graph behavior coverage. A key lesson: **evaluation should drive architecture decisions**,
   not the other way around.
 
-_Full detail: [`docs/07-next-steps.md`](docs/07-next-steps.md)._
-
 ---
 
 # Final Submission
 
-- **Public GitHub repo:** <https://github.com/xx257/bake-me-up> — this document, the per-task docs
-  under [`docs/`](docs/), and all code (`backend/` LangGraph agent + `backend/eval/` harness,
-  `frontend/` Next.js app).
+- **Public GitHub repo:** <https://github.com/xx257/bake-me-up> — this write-up and all code
+  (`backend/` LangGraph agent + `backend/eval/` harness, `frontend/` Next.js app).
 - **Live application:** <https://bake-me-up.vercel.app>
 - **Loom demo (≤10 min):** _link — TBD_ (records the use case + a live walkthrough: discovery,
   standalone-knowledge web fallback, Coach Mode, off-topic redirect).
