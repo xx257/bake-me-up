@@ -15,7 +15,7 @@ uv run --project backend langgraph dev    # local in-memory dev server + Studio 
 
 The graph (`agent/graph.py:graph`) is a context-gated **router** → three lanes:
 - **discover** — an agentic node that binds **two tools** and calls **exactly one**:
-  `search_collection` (recipe **profiles** from Qdrant → rank & explain) for finding/comparing/
+  `search_collection` (**parent-child** over fixed-150 recipe chunks in Qdrant → dedupe by `recipe_id` → full recipes → rank & explain) for finding/comparing/
   recommending a recipe, or `search_baking_web` (Tavily) for a **standalone baking-knowledge**
   question the collection doesn't cover. A missing/ambiguous choice retries once, then returns a
   graceful error — never silently recommends. Tavily is knowledge-only, never used to fetch recipes;
@@ -25,14 +25,15 @@ The graph (`agent/graph.py:graph`) is a context-gated **router** → three lanes
 
 All chat LLM calls go through the **Vercel AI Gateway**; per-session **thread** memory (managed
 Postgres checkpointer) carries the discovery goal into baking. **Retrieval decision:
-Discovery = Retrieval, Coaching = Full Recipe Context** — the chunk retriever
-(`retrieve_recipes` in `agent/retrieval.py`) is built but unwired; discovery uses recipe profiles.
+Discovery = Retrieval, Coaching = Full Recipe Context** — discovery uses **parent-child** retrieval
+(`retrieve_recipes` in `agent/retrieval.py`: fixed-150 child chunks → dedupe by `recipe_id` → full
+recipes); the eval (`backend/eval/`) imports the same primitives, so it evaluates the shipped retriever.
 
 ### Ingest the corpus
 
 ```bash
-uv run --project backend python -m agent.ingest parse   # offline chunk report (no keys)
-uv run --project backend python -m agent.ingest embed   # embed + upsert into Qdrant
+uv run --project backend python -m agent.ingest parse   # offline parser sanity report (no keys)
+uv run --project backend python -m agent.ingest fixed   # embed fixed-150 child chunks -> Qdrant
 ```
 
 ## Layout

@@ -24,7 +24,11 @@ from langchain_core.messages import HumanMessage, SystemMessage  # noqa: E402
 from pydantic import BaseModel, Field  # noqa: E402
 
 from agent.catalog import get_body  # noqa: E402
-from agent.config import get_chat_llm, get_embeddings, get_qdrant_client  # noqa: E402
+from agent.config import get_chat_llm  # noqa: E402
+
+# Shared with production: the eval retrieves through the SHIPPED discovery primitives, so it
+# evaluates the same child-retrieval + parent-dedup the live app uses.
+from agent.retrieval import dedup_recipe_ids, retrieve_children  # noqa: E402, F401
 
 _ENC = tiktoken.get_encoding("cl100k_base")
 MAX_PARENTS = 3  # cap parent expansion at 3 distinct recipes
@@ -32,39 +36,6 @@ MAX_PARENTS = 3  # cap parent expansion at 3 distinct recipes
 
 def n_tokens(text: str) -> int:
     return len(_ENC.encode(text))
-
-
-# ── Child retrieval (the shared primitive) ───────────────────────────────────
-def retrieve_children(query: str, collection: str, k: int = 3) -> list[dict]:
-    """Dense child search over `collection`. Returns raw child hits, best-first:
-    [{recipe_id, text, section, score}]. No mapping-up — that happens per config."""
-    vector = get_embeddings().embed_query(query)
-    hits = get_qdrant_client().query_points(
-        collection_name=collection, query=vector, limit=k, with_payload=True
-    ).points
-    out: list[dict] = []
-    for h in hits:
-        pl = h.payload or {}
-        md = pl.get("metadata", {}) or {}
-        out.append(
-            {
-                "recipe_id": md.get("recipe_id"),
-                "text": pl.get("page_content") or pl.get("text") or "",
-                "section": md.get("section"),
-                "score": round(h.score, 4),
-            }
-        )
-    return out
-
-
-def dedup_recipe_ids(children: list[dict]) -> list[str]:
-    """Distinct recipe ids in first-child-hit order (stable, best-first)."""
-    seen: list[str] = []
-    for c in children:
-        rid = c["recipe_id"]
-        if rid and rid not in seen:
-            seen.append(rid)
-    return seen
 
 
 # ── Answer generation ────────────────────────────────────────────────────────

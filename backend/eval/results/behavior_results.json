@@ -13,7 +13,7 @@
         "mode": "discover",
         "tool": "search_collection",
         "web_search": false,
-        "reply": "I'd go with the Japanese Cheesecake. It's light, fluffy, and has a mild, tangy sweetness rather than being overly sugary. Serve it with berries or tea for a balanced treat."
+        "reply": "I'd go with the Japanese Roll Cake. Its light, fluffy sponge and lightly sweetened whipped cream filling make it airy and not overly sweet. For an even less sweet result, you can reduce the sugar in the cream to taste."
       },
       "pass": true
     },
@@ -30,7 +30,7 @@
         "mode": "discover",
         "tool": null,
         "web_search": true,
-        "reply": "Yudane makes bread softer because it involves mixing boiling water with flour before making the dough. This process gelatinizes the starches in the flour, allowing the dough to hold more moisture. As a result, the baked bread stays softer a"
+        "reply": "Yudane makes bread softer because it gelatinizes the starch in the flour, which helps the dough retain more moisture. This keeps the bread tender, gives it a more open crumb, and helps it stay soft for longer.\n\nWould you like help finding a"
       },
       "pass": true
     },
@@ -64,7 +64,7 @@
         "mode": "discover",
         "tool": null,
         "web_search": false,
-        "reply": "The recipe uses 6 g of salt for one loaf. Standard table salt contains about 2,300 mg of sodium per 6 g. The loaf is divided into two 325 g pieces, but both are baked together as one loaf.\n\nIf you slice the loaf into 12 equal pieces, each s"
+        "reply": "The recipe uses 6 grams of salt for one loaf. Standard table salt contains about 2,300 mg of sodium per 6 grams. The loaf is divided into two dough pieces, but both are baked together, so the total sodium is for the whole loaf.\n\nIf you slic"
       },
       "pass": false
     }

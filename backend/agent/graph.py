@@ -31,7 +31,7 @@ from pydantic import BaseModel, Field
 
 from .catalog import get_body, get_entry
 from .config import get_chat_llm
-from .retrieval import retrieve_profiles
+from .retrieval import retrieve_recipes
 from .tools import _tavily_search, search_baking_web
 
 Mode = Literal["discover", "coach", "redirect"]
@@ -175,6 +175,8 @@ def _intent_query(intent: _Intent, goal: str) -> str:
 
 
 def _candidates_block(cands: list[dict]) -> str:
+    """Parent recipes for the ranker: a one-line metadata header per recipe (for choosing/ranking)
+    plus its FULL body (for grounded answers — the parent-child 'answer from the full recipe')."""
     lines = []
     for c in cands:
         j = lambda xs: ", ".join(xs or [])  # noqa: E731
@@ -185,6 +187,9 @@ def _candidates_block(cands: list[dict]) -> str:
             f"texture: {j(c.get('texture'))} | good for: {j(c.get('occasion'))} | "
             f"pairs: {j(c.get('pairs_with'))} | {c.get('summary', '')}"
         )
+        body = (c.get("body") or "").strip()
+        if body:
+            lines.append(f"  --- FULL RECIPE ({c['id']}) ---\n{body}\n")
     return "\n".join(lines)
 
 
@@ -294,9 +299,10 @@ def _run_collection_search(
     time_limit_min: int | None = None,
     ingredients: list[str] | None = None,
 ) -> dict:
-    """Profile search over Qdrant from the model's structured args. A first-class `tool` span
-    (like the Tavily search). Returns `{"candidates", "input"}` — the caller ranks the candidates
-    and builds the UI card from `input`."""
+    """Parent-child recipe search over Qdrant from the model's structured args. A first-class
+    `tool` span (like the Tavily search): retrieve fixed-150 child chunks → dedupe by parent
+    `recipe_id` → return the full parent recipes. Returns `{"candidates", "input"}` — the caller
+    ranks the candidates and builds the UI card from `input`."""
     intent = _Intent(
         taste=taste,
         texture=texture,
@@ -305,7 +311,7 @@ def _run_collection_search(
         time_limit_min=time_limit_min,
         available_ingredients=ingredients or [],
     )
-    candidates = retrieve_profiles(_intent_query(intent, request), k=4, score_floor=0.2)
+    candidates = retrieve_recipes(_intent_query(intent, request), top_k=3, score_floor=0.2)
     return {"candidates": candidates, "input": _intent_input(intent, request)}
 
 
