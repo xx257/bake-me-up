@@ -8,7 +8,7 @@ bake it step-by-step, recover from mistakes, and pass it on so others can recrea
 
 > AI Makerspace Certification Challenge v1.0 project.
 >
-> **Live:** [bake-me-up.vercel.app](https://bake-me-up.vercel.app)
+> **Live:** [bake-me-up.vercel.app](https://bake-me-up.vercel.app) · **Demo:** _Loom link — TBD_ · **Docs:** [all 7 tasks below](#docs)
 
 ## Problem
 
@@ -61,7 +61,9 @@ Full write-up: [`docs/02-solution.md`](docs/02-solution.md).
 - [`docs/01-problem.md`](docs/01-problem.md) — Task 1: problem, audience, scope, eval questions
 - [`docs/02-solution.md`](docs/02-solution.md) — Task 2: solution, infra & agent diagrams
 - [`docs/03-data.md`](docs/03-data.md) — Task 3: data sources + chunking strategy
-- [`docs/evaluation.md`](docs/evaluation.md) — evaluation strategy
+- [`docs/04-prototype.md`](docs/04-prototype.md) — Task 4: end-to-end prototype + public deployment
+- [`docs/evaluation.md`](docs/evaluation.md) — Tasks 5 & 6: test dataset, eval harness, results
+- [`docs/07-next-steps.md`](docs/07-next-steps.md) — Task 7: next steps (keep vs. improve)
 
 ## Status
 
@@ -72,7 +74,9 @@ Full write-up: [`docs/02-solution.md`](docs/02-solution.md).
 - [x] **Agentic discovery** — `search_collection` + `search_baking_web` as tools; the discover
       node calls exactly one, so a standalone baking question is answered from the web (visible
       "Searched the web" card), while recipe search stays collection-only
-- [ ] **In progress** — evaluation (RAGAS + discovery + LLM-judge), Loom + write-up
+- [x] **Evaluation** — Task 5/6 harness built & run (parent-child vs fixed-chunk, RAGAS +
+      locked LLM-judge), isolated in `backend/eval/`; results in [`docs/evaluation.md`](docs/evaluation.md)
+- [ ] **Submission** — 🎥 Loom demo (_link TBD_) + submit the challenge form
 - [ ] **Planned** — web **recipe discovery**: let Tavily also find recipes off the web and
       **ingest** them into the collection (structure → profile + body → Qdrant), so a "no match"
       can become a saved recipe. Today Tavily is deliberately knowledge-only; this is the next

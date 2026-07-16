@@ -57,7 +57,18 @@ corpus), split into two subsets scored **separately**:
 
 ---
 
-## Task 6 — Advanced retriever: parent-child
+## Task 6 — Two improvements, isolated one variable at a time
+
+Two distinct levers are evaluated on the same harness, each with a before/after:
+
+- **Task 6.1 — advanced retrieval technique: parent-child** → **Comparison A** below (identical child
+  hits, full-recipe answer context vs. raw fragments): correctness **3.8 → 4.4**, answer_relevancy
+  **0.61 → 0.74**.
+- **Task 6.3 — a change to a second piece of the solution: the child chunk size** (the
+  chunking/indexing config, distinct from the retriever) → **Comparison B** below (150 → 250-token
+  children): `recipe_id_hit@3` **0.90 → 1.00** and correctness **4.4 → 4.7**, at ~35% more tokens.
+
+### Task 6.1 — Advanced retriever: parent-child
 
 **Why parent-child.** It is already the product's own pattern — retrieve small child chunks to
 *identify* the source recipe, then hand the model the **full recipe** to *answer* from. Child
@@ -91,8 +102,8 @@ Row-by-row identity check (fixed-150 vs parent-child-150 child hits): **IDENTICA
 
 ### Pre-registered expectations vs. outcomes
 
-**Comparison A — fixed-150 vs parent-child-150** (identical child hits, only the answer context
-differs):
+**Comparison A — fixed-150 vs parent-child-150 · Task 6.1 (advanced retriever)** (identical child
+hits, only the answer context differs):
 - `recipe_id_hit@3` **identical (0.90)** ✅ by construction — this comparison is purely about
   *generation context*.
 - Full-recipe context **clearly improves answer quality**: correctness **3.8 → 4.4**, pass@≥4
@@ -107,8 +118,8 @@ differs):
   it wrong (correctness 1). **When retrieval misses, parent-child can’t rescue it** — retrieval and
   generation are independent stages.
 
-**Comparison B — parent-child-150 vs parent-child-250** (child-size variable): child size *did*
-matter here — 250-token children caught the “most time-consuming” query (`hit@3` **0.90 → 1.00**)
+**Comparison B — parent-child-150 vs parent-child-250 · Task 6.3 (second lever: child chunk size)**
+(child-size variable): child size *did* matter here — 250-token children caught the “most time-consuming” query (`hit@3` **0.90 → 1.00**)
 and lifted correctness **4.4 → 4.7**, **but** cost more tokens (1294 → 1760) and slightly *diluted*
 answer_relevancy (0.74 → 0.69). A real, nuanced tradeoff — not a free win.
 
@@ -150,16 +161,18 @@ A representative discovery turn (`search_collection`) traces as one shallow grap
 
 ```
 user "I want something fluffy and not too sweet"
-  └─ route (gpt-4o-mini)            → mode = discover
+  └─ route (mini model)              → mode = discover
   └─ discover
-       ├─ extract intent            → {texture: fluffy, taste: not sweet}
-       ├─ retrieve_profiles (Qdrant)→ 3 candidates + cosine _score  [retriever span]
-       └─ rank (gpt-4o)             → 1–2 recommendation cards + "search_collection" tool card
+       ├─ search_collection (tool)   → model-authored args {texture: fluffy, taste: not sweet}
+       │    └─ retrieve_profiles (Qdrant) → candidates + cosine _score   [retriever span]
+       └─ rank (chat model)          → 1–2 recommendation cards + "search_collection" tool card
 ```
 
-The retriever span shows the exact query, candidates, and scores; the `tool` payload is what the
-UI renders as the “Searched your collection” card. Production traces land in the LangSmith
-project `bake-me-up-v0`; local eval runs in `bake-me-up-dev`.
+The discover node binds two tools and calls exactly one; here it chose `search_collection` (a
+standalone knowledge turn would call `search_baking_web` instead). The retriever span shows the
+exact query, candidates, and scores; the `tool` payload is what the UI renders as the “Searched
+your collection” card. Production traces land in the LangSmith project `bake-me-up-v0`; local eval
+runs in `bake-me-up-dev`.
 
 ---
 
