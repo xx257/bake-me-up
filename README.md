@@ -8,7 +8,8 @@ bake it step-by-step, recover from mistakes, and pass it on so others can recrea
 
 > AI Makerspace Certification Challenge v1.0 project.
 >
-> **Live:** [bake-me-up.vercel.app](https://bake-me-up.vercel.app) · **Demo:** _Loom link — TBD_ · **Docs:** [all 7 tasks below](#docs)
+> **📄 Submission write-up (all 7 tasks in one doc):** [`SUBMISSION.md`](SUBMISSION.md)
+> · **Live:** [bake-me-up.vercel.app](https://bake-me-up.vercel.app) · **Demo:** _Loom link — TBD_
 
 ## Problem
 
@@ -57,6 +58,10 @@ coaching, sharing one `threadId` so context never repeats.
 Full write-up: [`docs/02-solution.md`](docs/02-solution.md).
 
 ## Docs
+
+- **[`SUBMISSION.md`](SUBMISSION.md) — consolidated write-up: every deliverable (Tasks 1–7 + Final) in one document.**
+
+Per-task source docs (linked from the write-up):
 
 - [`docs/01-problem.md`](docs/01-problem.md) — Task 1: problem, audience, scope, eval questions
 - [`docs/02-solution.md`](docs/02-solution.md) — Task 2: solution, infra & agent diagrams
