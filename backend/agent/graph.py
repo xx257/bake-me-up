@@ -28,7 +28,7 @@ from langgraph.graph.message import add_messages
 from langsmith import traceable
 from pydantic import BaseModel, Field
 
-from .catalog import get_body, get_catalog, get_entry
+from .catalog import get_body, get_entry
 from .config import get_chat_llm
 from .retrieval import retrieve_profiles
 from .tools import _tavily_search, search_baking_web
@@ -54,10 +54,6 @@ def _last_user_text(messages: list) -> str:
         if isinstance(m, dict) and m.get("role") == "user":
             return m["content"]
     return ""
-
-
-def _library_titles() -> str:
-    return ", ".join(r["title"] for r in get_catalog())
 
 
 def _title_for(recipe_id: str | None) -> str | None:
