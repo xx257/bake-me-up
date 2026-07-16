@@ -1,0 +1,30 @@
+name: keep-warm
+
+# Ping the LangGraph Platform backend's health endpoint on a schedule so the container
+# doesn't scale to zero — that idle-out is what causes the slow cold-start on the first
+# user request. `/ok` is unauthenticated and cheap (no LLM cost). Combined with the
+# background client warmup (agent.config.warmup), this keeps the first call fast.
+#
+# Notes: scheduled workflows run only on the default branch; GitHub disables them after
+# ~60 days of repo inactivity. If cold starts persist (i.e. /ok is served without keeping
+# the graph container alive), escalate to an authenticated POST /runs ping.
+
+on:
+  schedule:
+    - cron: "*/5 * * * *" # every ~5 min (GitHub's minimum; may jitter under load)
+  workflow_dispatch: {} # manual trigger — e.g. right before a demo
+
+# Don't pile up overlapping runs if one lags.
+concurrency:
+  group: keep-warm
+  cancel-in-progress: true
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping backend /ok
+        run: |
+          curl -fsS --max-time 30 \
+            "https://bake-me-up-v0-ab7e1da64ed6588daa12128504877b88.us.langgraph.app/ok"
+          echo " — backend warm"

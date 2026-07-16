@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ChefHat, MessageCircle, X } from "lucide-react";
+import { MessageCircle, X } from "lucide-react";
 import type { Recipe } from "@/lib/recipes";
 import RecipeHero from "./recipe/RecipeHero";
 import MetaCards from "./recipe/MetaCards";
@@ -126,7 +126,7 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
           </aside>
         )}
 
-        <div className="mx-auto w-full max-w-[760px] space-y-10 pb-28 lg:mx-0 lg:pb-10">
+        <div className="mx-auto w-full max-w-[760px] space-y-10 pb-12 lg:mx-0 lg:pb-10">
           <RecipeHero
             recipe={recipe}
             canBake={hasSteps}
@@ -183,26 +183,6 @@ export default function RecipeWorkspace({ recipe }: { recipe: Recipe }) {
         >
           <MessageCircle className="h-4 w-4 text-primary" /> Ask Coach
         </button>
-      )}
-
-      {/* Mobile: a slim sticky bar so Start Baking + coach stay reachable while scrolling. */}
-      {!coachOpen && (
-        <div className="fixed inset-x-0 bottom-0 z-30 flex items-center gap-2 border-t border-border/50 bg-background/90 px-4 py-3 backdrop-blur lg:hidden">
-          <button
-            onClick={startBaking}
-            disabled={!hasSteps}
-            className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition hover:brightness-105 disabled:opacity-40"
-          >
-            <ChefHat className="h-4 w-4" /> Start Baking
-          </button>
-          <button
-            onClick={openCoach}
-            aria-label="Ask Coach"
-            className="inline-flex items-center justify-center rounded-full bg-secondary/70 p-2.5 text-foreground/70 transition hover:bg-secondary"
-          >
-            <MessageCircle className="h-5 w-5" />
-          </button>
-        </div>
       )}
 
       {/* On-demand coach: bottom-sheet on mobile, side panel on desktop. */}

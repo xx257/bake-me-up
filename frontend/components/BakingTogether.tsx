@@ -78,36 +78,42 @@ export default function BakingTogether({
 
   return (
     <div ref={scrollRef} className="fixed inset-0 z-50 overflow-y-auto bg-background">
-      <div className="mx-auto w-full max-w-[680px] px-5 pb-[max(3rem,env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))]">
+      {/* flex column so mobile can reorder sections (advance + chat first) without
+          duplicating markup; sm+ resets to source order → desktop is unchanged. */}
+      <div className="mx-auto flex w-full max-w-[680px] flex-col px-5 pb-24 pt-[max(0.75rem,env(safe-area-inset-top))] sm:pb-[max(3rem,env(safe-area-inset-bottom))]">
         {/* Top bar */}
-        <button
-          onClick={onExit}
-          className="inline-flex items-center gap-1 text-sm text-muted-foreground transition hover:text-primary"
-        >
-          <ArrowLeft className="h-4 w-4" /> Recipe
-        </button>
+        <div className="order-1">
+          <button
+            onClick={onExit}
+            className="inline-flex items-center gap-1 text-sm text-muted-foreground transition hover:text-primary"
+          >
+            <ArrowLeft className="h-4 w-4" /> Recipe
+          </button>
+        </div>
 
         {/* ── Current step ─────────────────────────────────────────── */}
-        <div className="mt-6 text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
-          Step {index + 1} of {total}
-        </div>
-        <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-secondary">
-          <div
-            className="h-full rounded-full bg-primary transition-all duration-300"
-            style={{ width: `${pct}%` }}
-          />
-        </div>
-        <h1 className="font-display mt-4 text-3xl leading-tight tracking-tight text-foreground">
-          {step.title}
-        </h1>
-        {time && <div className="mt-1.5 text-sm text-muted-foreground">{time}</div>}
-        <div className="prose prose-stone mt-4 max-w-none text-[1.05rem] leading-relaxed text-body prose-headings:text-foreground prose-p:my-2.5 prose-p:text-body prose-strong:text-foreground prose-li:text-body">
-          <Markdown remarkPlugins={[remarkGfm]}>{step.body}</Markdown>
-        </div>
+        <section className="order-2">
+          <div className="mt-6 text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
+            Step {index + 1} of {total}
+          </div>
+          <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-secondary">
+            <div
+              className="h-full rounded-full bg-primary transition-all duration-300"
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+          <h1 className="font-display mt-4 text-3xl leading-tight tracking-tight text-foreground">
+            {step.title}
+          </h1>
+          {time && <div className="mt-1.5 text-sm text-muted-foreground">{time}</div>}
+          <div className="prose prose-stone mt-4 max-w-none text-[1.05rem] leading-relaxed text-body prose-headings:text-foreground prose-p:my-2.5 prose-p:text-body prose-strong:text-foreground prose-li:text-body">
+            <Markdown remarkPlugins={[remarkGfm]}>{step.body}</Markdown>
+          </div>
+        </section>
 
         {/* ── Kiwi guidance ────────────────────────────────────────── */}
         {notePara.length > 0 && (
-          <>
+          <section className="order-3">
             <Divider />
             <div className="flex items-center gap-2">
               <KiwiMark size={22} />
@@ -118,12 +124,12 @@ export default function BakingTogether({
                 <p key={i}>{p}</p>
               ))}
             </div>
-          </>
+          </section>
         )}
 
         {/* ── Ready when ───────────────────────────────────────────── */}
         {step.completion.length > 0 && (
-          <>
+          <section className="order-5 sm:order-4">
             <Divider />
             <div className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
               Ready when
@@ -136,108 +142,142 @@ export default function BakingTogether({
                 </li>
               ))}
             </ul>
-          </>
+          </section>
         )}
 
         {/* ── Suggested questions ──────────────────────────────────── */}
-        <Divider />
-        <div className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
-          Suggested questions
-        </div>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {chips.map((s) => (
-            <button
-              key={s}
-              onClick={() => send(s)}
-              disabled={loading}
-              className="rounded-full bg-primary/10 px-3.5 py-1.5 text-sm text-foreground transition hover:bg-primary/15 disabled:opacity-40"
-            >
-              {s}
-            </button>
-          ))}
-        </div>
+        <section className="order-6 sm:order-5">
+          <Divider />
+          <div className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
+            Suggested questions
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {chips.map((s) => (
+              <button
+                key={s}
+                onClick={() => send(s)}
+                disabled={loading}
+                className="rounded-full bg-primary/10 px-3.5 py-1.5 text-sm text-foreground transition hover:bg-primary/15 disabled:opacity-40"
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        </section>
 
-        {/* ── Progression ──────────────────────────────────────────── */}
-        <Divider />
-        <div className="flex items-center justify-between gap-3">
-          {!isFirst ? (
-            <button
-              onClick={() => onIndex(index - 1)}
-              className="inline-flex items-center gap-1 text-sm text-muted-foreground transition hover:text-foreground"
-            >
-              <ArrowLeft className="h-4 w-4" /> Back
-            </button>
-          ) : (
-            <span />
-          )}
-          <button
-            onClick={() => (isLast ? onFinish() : onIndex(index + 1))}
-            className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition hover:bg-primary-hover"
-          >
-            {isLast ? (
-              "Finish"
+        {/* ── Progression (desktop, inline). On mobile this lives in the pinned
+             bottom bar below so I'm Ready is never scrolled out of view. ── */}
+        <section className="order-7 hidden sm:order-6 sm:block">
+          <Divider />
+          <div className="flex items-center justify-between gap-3">
+            {!isFirst ? (
+              <button
+                onClick={() => onIndex(index - 1)}
+                className="inline-flex items-center gap-1 text-sm text-muted-foreground transition hover:text-foreground"
+              >
+                <ArrowLeft className="h-4 w-4" /> Back
+              </button>
             ) : (
-              <>
-                I&apos;m Ready <ArrowRight className="h-4 w-4" />
-              </>
+              <span />
             )}
-          </button>
-        </div>
+            <button
+              onClick={() => (isLast ? onFinish() : onIndex(index + 1))}
+              className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition hover:bg-primary-hover"
+            >
+              {isLast ? (
+                "Finish"
+              ) : (
+                <>
+                  I&apos;m Ready <ArrowRight className="h-4 w-4" />
+                </>
+              )}
+            </button>
+          </div>
+        </section>
 
         {/* ── Conversation ─────────────────────────────────────────── */}
-        <Divider />
-        <div className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
-          Conversation
-        </div>
-        <div className="mt-3 space-y-3">
-          {messages.length === 0 && !loading && (
-            <p className="text-sm text-muted-foreground">
-              Ask Kiwi anything about this step — tap a question above or type below.
-            </p>
-          )}
-          {messages.map((m, i) =>
-            m.role === "user" ? (
-              <Message key={i} from="user">
-                <MessageContent>
-                  <MessageResponse>{m.content}</MessageResponse>
-                </MessageContent>
-              </Message>
-            ) : (
-              <div key={i} className="space-y-3">
-                <div className="rounded-2xl border border-[#e8e0d6] bg-card p-4 text-body">
-                  <MessageResponse>{m.content}</MessageResponse>
+        <section className="order-4 sm:order-7">
+          <Divider />
+          <div className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
+            Conversation
+          </div>
+          <div className="mt-3 space-y-3">
+            {messages.length === 0 && !loading && (
+              <p className="text-sm text-muted-foreground">
+                Ask Kiwi anything about this step — tap a question above or type below.
+              </p>
+            )}
+            {messages.map((m, i) =>
+              m.role === "user" ? (
+                <Message key={i} from="user">
+                  <MessageContent>
+                    <MessageResponse>{m.content}</MessageResponse>
+                  </MessageContent>
+                </Message>
+              ) : (
+                <div key={i} className="space-y-3">
+                  <div className="rounded-2xl border border-[#e8e0d6] bg-card p-4 text-body">
+                    <MessageResponse>{m.content}</MessageResponse>
+                  </div>
+                  <WebSearchCard webSearch={m.webSearch} />
                 </div>
-                <WebSearchCard webSearch={m.webSearch} />
-              </div>
-            ),
-          )}
-          {loading && (
-            <ReasoningStages stages={["Reading the recipe", "Thinking it through"]} />
-          )}
-          <div ref={endRef} />
-        </div>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            submit(input);
-          }}
-          className="mt-4 flex items-center gap-2"
-        >
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask Kiwi about this step…"
-            className="flex-1 rounded-full border border-border bg-card px-4 py-2.5 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:border-primary/60"
-          />
-          <button
-            type="submit"
-            disabled={loading || !input.trim()}
-            className="rounded-full bg-primary p-2 text-white transition disabled:opacity-40"
-            aria-label="Send"
+              ),
+            )}
+            {loading && (
+              <ReasoningStages stages={["Reading the recipe", "Thinking it through"]} />
+            )}
+            <div ref={endRef} />
+          </div>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              submit(input);
+            }}
+            className="mt-4 flex items-center gap-2"
           >
-            <Send className="h-4 w-4" />
+            <input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Ask Kiwi about this step…"
+              className="flex-1 rounded-full border border-border bg-card px-4 py-2.5 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:border-primary/60"
+            />
+            <button
+              type="submit"
+              disabled={loading || !input.trim()}
+              className="rounded-full bg-primary p-2 text-white transition disabled:opacity-40"
+              aria-label="Send"
+            >
+              <Send className="h-4 w-4" />
+            </button>
+          </form>
+        </section>
+      </div>
+
+      {/* Mobile: pin Back / I'm Ready to the bottom so advancing never requires
+          scrolling to find it. Desktop uses the inline progression above. */}
+      <div className="fixed inset-x-0 bottom-0 z-10 flex items-center justify-between gap-3 border-t border-border/50 bg-background/90 px-5 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur sm:hidden">
+        {!isFirst ? (
+          <button
+            onClick={() => onIndex(index - 1)}
+            className="inline-flex items-center gap-1 text-sm text-muted-foreground transition hover:text-foreground"
+          >
+            <ArrowLeft className="h-4 w-4" /> Back
           </button>
-        </form>
+        ) : (
+          <span />
+        )}
+        <button
+          onClick={() => (isLast ? onFinish() : onIndex(index + 1))}
+          className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition hover:bg-primary-hover"
+        >
+          {isLast ? (
+            "Finish"
+          ) : (
+            <>
+              I&apos;m Ready <ArrowRight className="h-4 w-4" />
+            </>
+          )}
+        </button>
       </div>
     </div>
   );
