@@ -29,8 +29,9 @@ Coaching is the heart of the product; retrieval and recommendation are supportin
   you understand it on a calm recipe reference before you start.
 - **Coach Mode (Execute)** — a full-screen calm instructor: it knows the **active recipe**,
   the **current step**, the **workflow**, and the **conversation**. Context greeting →
-  current step → *Ready when* / tip → **I'm Ready** → a persistent "ask me anything" chat.
-  Optimized for **confidence, not completion**.
+  current step → *Ready when* / tip → **I'm Ready** → a **per-step** Q&A (each step has its own
+  conversation; the shared session thread keeps **full history** so the coach still remembers
+  earlier steps). Optimized for **confidence, not completion**.
 - **Troubleshoot** — recipe-specific recovery ("why did my cheesecake crack?"), with a web
   fallback only when the recipe genuinely can't answer.
 
@@ -56,6 +57,28 @@ coaching, sharing one `threadId` so context never repeats.
 - **Monitoring:** LangSmith · **Eval:** RAGAS + discovery quality + LLM-judge.
 
 Full write-up: [`docs/02-solution.md`](docs/02-solution.md).
+
+## Run locally
+
+```bash
+# backend — LangGraph dev server + Studio  (needs backend/.env: model gateway, Qdrant, Tavily, LangSmith)
+backend/.venv/bin/langgraph dev                                   # http://127.0.0.1:2024
+
+# frontend — Next.js  (defaults to the deployed backend via .env.local;
+# override to point at the local one:)
+LANGGRAPH_API_URL=http://127.0.0.1:2024 npm --prefix frontend run dev   # http://localhost:3000
+```
+
+Deploy: push to `main` → Vercel auto-deploys the frontend; the LangGraph Platform backend is a
+managed deploy of the `agent` graph (repo-root `langgraph.json`).
+
+## Repo layout
+
+- `backend/agent/` — the LangGraph agent: `graph.py` (route → discover / coach / redirect),
+  `tools.py` (`search_baking_web`), `retrieval.py`, `catalog.py` / `ingest.py`
+- `backend/eval/` — Task 5/6 evaluation harness (isolated; never runs in production)
+- `frontend/` — Next.js app (Kitchen · Recipe page · Coach Mode) + `app/api/chat` proxy
+- `data/recipes/` — the 6-recipe corpus · `docs/` — per-task write-ups · `SUBMISSION.md` — consolidated
 
 ## Docs
 
